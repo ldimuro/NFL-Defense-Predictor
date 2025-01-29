@@ -4,19 +4,19 @@ from pro_football_reference_web_scraper import player_game_log as nfl_player
 from pro_football_reference_web_scraper import team_game_log as nfl_team
 
 def plays_2022():
-    file_path = 'plays_2022.csv'
+    file_path = 'data/plays_2022.csv'
     data = pd.read_csv(file_path)
     return data
 
 def games_2022():
-    file_path = 'games_2022.csv'
+    file_path = 'data/games_2022.csv'
     data = pd.read_csv(file_path)
     return data
 
 
 def play_by_play():
     # Load the CSV file into a DataFrame
-    file_path = 'play_by_play_2024.csv'  # Replace with the actual file path
+    file_path = 'data/play_by_play_2024.csv'  # Replace with the actual file path
     df = pd.read_csv(file_path)
 
     # Display the first few rows to ensure it loaded correctly
