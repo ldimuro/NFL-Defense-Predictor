@@ -3,11 +3,14 @@ import torch
 from pro_football_reference_web_scraper import player_game_log as nfl_player
 from pro_football_reference_web_scraper import team_game_log as nfl_team
 
-def plays():
-    # Load the CSV file into a DataFrame
-    file_path = 'plays_2022.csv'  # Replace with the actual file path
+def plays_2022():
+    file_path = 'plays_2022.csv'
     data = pd.read_csv(file_path)
+    return data
 
+def games_2022():
+    file_path = 'games_2022.csv'
+    data = pd.read_csv(file_path)
     return data
 
 
