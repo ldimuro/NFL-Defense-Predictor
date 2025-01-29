@@ -12,13 +12,11 @@ def main():
     play_data = get_data.plays()
 
     passing_3rd_down_model = Passing3rdDown(play_data)
-    passing_3rd_down_model.test()
-
 
     # List all column values in the first row
     # 0 = Pass
     # 32 = Run
-    first_row = play_data.iloc[13]
+    first_row = play_data.iloc[0]
     for column, value in first_row.items():
         print(f'{column}: {value}')
 
