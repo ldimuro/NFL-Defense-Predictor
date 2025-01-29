@@ -1,36 +1,27 @@
 import pandas as pd
 
 def encode_yardsToGo(yards_to_go):
-    # Inches= 1
-    # Short = 2-5
-    # Med   = 6-9
-    # Long  = 10+
-
     if pd.isna(yards_to_go):
         return -1
 
-    if yards_to_go == 1: # Inches
+    if yards_to_go == 1: # Inches (1 yard to go)
         return 0
-    elif yards_to_go > 1 and yards_to_go <= 5: # Short
+    elif yards_to_go > 1 and yards_to_go <= 5: # Short (2-5 yards to go)
         return 1
-    elif yards_to_go > 5 and yards_to_go <= 9: # Medium
+    elif yards_to_go > 5 and yards_to_go <= 9: # Medium (6-9 yards to go)
         return 2
-    else: # Long
+    else: # Long (10+ yards to go)
         return 3
     
 def encode_passLength(pass_length):
-    # Short = 0-7
-    # Med   = 8-15
-    # Deep  = 16+
-    
     if pd.isna(pass_length):
         return -1
     
-    if pass_length <= 7: # Short
+    if pass_length <= 7: # Short (0-7 yards)
         return 0
-    elif pass_length > 7 and pass_length <= 15: # Medium
+    elif pass_length > 7 and pass_length <= 15: # Medium (8-15 yards)
         return 1
-    else: # Deep
+    else: # Deep (16+ yards)
         return 2
     
 def encode_offenseFormation(formation):

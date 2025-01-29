@@ -9,17 +9,18 @@ def main():
     # print(kyler_murray_stats)
     # print(cardinals_2008_stats)
 
-    plays_data = get_data.plays_2022()
-    games_data = get_data.games_2022()
+    # plays_data = get_data.plays_2022()
+    # games_data = get_data.games_2022()
 
-    passing_3rd_down_model = Passing3rdDown(plays_data, games_data)
+    passing_3rd_down_model = Passing3rdDown()
+    passing_3rd_down_model.train_model()
 
     # List all column values in the first row
     # 0 = Pass
     # 32 = Run
-    first_row = plays_data.iloc[0]
-    for column, value in first_row.items():
-        print(f'{column}: {value}')
+    # first_row = plays_data.iloc[0]
+    # for column, value in first_row.items():
+    #     print(f'{column}: {value}')
 
     print('================================================================')
 
