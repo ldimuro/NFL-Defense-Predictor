@@ -142,13 +142,13 @@ def get_possessionTeamScoreDiff(row):
     differential = row['preSnapHomeScore'] - row['preSnapVisitorScore']
 
     # Separate differential into possession margin
-    if differential == 0: # Tie game
+    if differential == 0:                           # Tie game
         possession_differential = 0
-    elif differential <= 8: # 1 score game
+    elif differential <= 8:                         # 1 score game
         possession_differential = 1
-    elif differential > 8 and differential <= 16: # 2 score game
+    elif differential > 8 and differential <= 16:   # 2 score game
         possession_differential = 2
-    elif differential > 16 and differential <= 24: # 3 score game
+    elif differential > 16 and differential <= 24:  # 3 score game
         possession_differential = 3
     else:
         possession_differential = 4 # 4+ score game
@@ -159,4 +159,103 @@ def get_possessionTeamScoreDiff(row):
 
     return possession_differential
 
+def encode_passLocation(row):
+    if row['targetY'] == -1 or row['passLength'] == -1:
+        return -1
+    
+    if row['targetY'] == 0 and row['passLength'] == 0:      # Short pass left
+        return 0
+    elif row['targetY'] == 0 and row['passLength'] == 1:    # Short pass middle
+        return 1
+    elif row['targetY'] == 0 and row['passLength'] == 2:    # Short pass middle
+        return 2
+    elif row['targetY'] == 1 and row['passLength'] == 0:    # Med pass left
+        return 3
+    elif row['targetY'] == 1 and row['passLength'] == 1:    # Med pass middle
+        return 4
+    elif row['targetY'] == 1 and row['passLength'] == 2:    # Med pass right
+        return 5
+    elif row['targetY'] == 2 and row['passLength'] == 0:    # Deep pass left
+        return 6
+    elif row['targetY'] == 2 and row['passLength'] == 1:    # Deep pass middle
+        return 7
+    elif row['targetY'] == 2 and row['passLength'] == 2:    # Short pass right
+        return 8
+    
+def get_defensive_team(row):
+    if row['possessionTeam'] == row['homeTeamAbbr']:
+        return row['visitorTeamAbbr']
+    else:
+        return row['homeTeamAbbr']
+    
+def get_full_team_name(team_abbr):
+    return {
+        "ARI": "Arizona Cardinals",
+        "ATL": "Atlanta Falcons",
+        "BAL": "Baltimore Ravens",
+        "BUF": "Buffalo Bills",
+        "CAR": "Carolina Panthers",
+        "CHI": "Chicago Bears",
+        "CIN": "Cincinnati Bengals",
+        "CLE": "Cleveland Browns",
+        "DAL": "Dallas Cowboys",
+        "DEN": "Denver Broncos",
+        "DET": "Detroit Lions",
+        "GB": "Green Bay Packers",
+        "HOU": "Houston Texans",
+        "IND": "Indianapolis Colts",
+        "JAX": "Jacksonville Jaguars",
+        "KC": "Kansas City Chiefs",
+        "LV": "Las Vegas Raiders",
+        "LAC": "Los Angeles Chargers",
+        "LAR": "Los Angeles Rams",
+        "MIA": "Miami Dolphins",
+        "MIN": "Minnesota Vikings",
+        "NE": "New England Patriots",
+        "NO": "New Orleans Saints",
+        "NYG": "New York Giants",
+        "NYJ": "New York Jets",
+        "PHI": "Philadelphia Eagles",
+        "PIT": "Pittsburgh Steelers",
+        "SF": "San Francisco 49ers",
+        "SEA": "Seattle Seahawks",
+        "TB": "Tampa Bay Buccaneers",
+        "TEN": "Tennessee Titans",
+        "WAS": "Washington Commanders",
+    }.get(team_abbr, "Unknown Team")  # Default if abbreviation isn't found
+
+team_abbr_to_name = {
+    'ARI': 'Arizona Cardinals',
+    'ATL': 'Atlanta Falcons',
+    'BAL': 'Baltimore Ravens',
+    'BUF': 'Buffalo Bills',
+    'CAR': 'Carolina Panthers',
+    'CHI': 'Chicago Bears',
+    'CIN': 'Cincinnati Bengals',
+    'CLE': 'Cleveland Browns',
+    'DAL': 'Dallas Cowboys',
+    'DEN': 'Denver Broncos',
+    'DET': 'Detroit Lions',
+    'GB': 'Green Bay Packers',
+    'HOU': 'Houston Texans',
+    'IND': 'Indianapolis Colts',
+    'JAX': 'Jacksonville Jaguars',
+    'KC': 'Kansas City Chiefs',
+    'LV': 'Las Vegas Raiders',
+    'LAC': 'Los Angeles Chargers',
+    'LA': 'Los Angeles Rams',
+    'MIA': 'Miami Dolphins',
+    'MIN': 'Minnesota Vikings',
+    'NE': 'New England Patriots',
+    'NO': 'New Orleans Saints',
+    'NYG': 'New York Giants',
+    'NYJ': 'New York Jets',
+    'PHI': 'Philadelphia Eagles',
+    'PIT': 'Pittsburgh Steelers',
+    'SF': 'San Francisco 49ers',
+    'SEA': 'Seattle Seahawks',
+    'TB': 'Tampa Bay Buccaneers',
+    'TEN': 'Tennessee Titans',
+    'WAS': 'Washington Commanders',
+}
     

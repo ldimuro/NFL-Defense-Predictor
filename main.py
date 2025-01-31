@@ -9,11 +9,12 @@ def main():
     # print(kyler_murray_stats)
     # print(cardinals_2008_stats)
 
-    # plays_data = get_data.plays_2022()
+    plays_data = get_data.plays_2022()
     # games_data = get_data.games_2022()
 
     passing_3rd_down_model = Passing3rdDown()
     passing_3rd_down_model.train_model()
+    # passing_3rd_down_model.RandomForest()
 
     # List all column values in the first row
     # 0 = Pass
@@ -51,7 +52,7 @@ def main():
     # average_target_y = third_down_plays['targetY'].median()
     # print(f'Average Target Y of Pass: {average_target_y}')
 
-    # pass_coverage_counts = third_down_plays['pff_passCoverage'].value_counts()
+    # pass_coverage_counts = plays_data['pff_passCoverage'].value_counts()
     # print('pff_passCoverage on 3rd Down:', pass_coverage_counts)
 
     # pass_location_type = third_down_plays['passLocationType'].value_counts()
@@ -63,7 +64,7 @@ def main():
     # receiver_alignments = third_down_plays['receiverAlignment'].value_counts()
     # print('receiver_alignments on 3rd Down:', receiver_alignments)
 
-    # offense_formation = third_down_plays['offenseFormation'].value_counts()
+    # offense_formation = plays_data['offenseFormation'].value_counts()
     # print('offense_formation on 3rd Down:', offense_formation)
 
 
