@@ -18,18 +18,18 @@ class Passing3rdDown(nn.Module):
 
         # self.games_data = games_data
 
-        self.input_features = ['down', 'homeTeamAbbr', 'visitorTeamAbbr', 'possessionTeam', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'preSnapHomeScore', 'preSnapVisitorScore', 'offenseFormation', 'receiverAlignment', 'passLength', 'passResult', 'targetX', 'targetY', 'pff_passCoverage', 'pff_manZone', 'yardsGained', 'nonPossessionTeam', 'full_team_name', 'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP']
+        self.input_features = ['down', 'homeTeamAbbr', 'visitorTeamAbbr', 'possessionTeam', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'preSnapHomeScore', 'preSnapVisitorScore', 'offenseFormation', 'receiverAlignment', 'passLength', 'passResult', 'targetX', 'targetY', 'pff_passCoverage', 'pff_manZone', 'yardsGained', 'nonPossessionTeam', 'full_team_name', 'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP', 'firstDown']
 
         # self.train_x, self.train_y, self.test_x, self.test_y = self.process_data(plays_data, self.input_features)
 
         # Layers
-        self.linear_layer1 = nn.Linear(11, 32)
+        self.linear_layer1 = nn.Linear(28, 32)
         self.relu1 = nn.ReLU()
         self.linear_layer2 = nn.Linear(32, 16)
         self.relu2 = nn.ReLU()
         self.linear_layer3 = nn.Linear(16, 8)
         self.sigmoid = nn.Sigmoid()
-        self.output_layer = nn.Linear(8, 10)
+        self.output_layer = nn.Linear(8, 1)
 
     def process_data(self, data, input_features, normalize=True):
         data = pd.DataFrame(data)
@@ -64,85 +64,97 @@ class Passing3rdDown(nn.Module):
         
 
         # Filter Play data by 3rd Down Passing plays
-        # third_down_play_data = data[(data['down']) == 3 & (data['passResult'].notna())]
-        third_down_play_data = data[data['passResult'].notna()]
-        # third_down_play_data = data
+        # play_data = data[(data['down']) == 3 & (data['passResult'].notna())]
+        play_data = data[data['passResult'].notna()]
+        # play_data = data
 
         # Remove all columns except input_features
-        third_down_play_data = third_down_play_data.filter(items=input_features)
+        play_data = play_data.filter(items=input_features)
 
         # with pd.option_context('display.max_rows', None):
-        print('3rd Down Play Data\n', third_down_play_data)
+        print('3rd Down Play Data\n', play_data)
 
         # Convert preSnapHomeScore and preSnapVisitorScore to possessionTeamScoreDiff
-        third_down_play_data['possessionTeamScoreDiff'] = third_down_play_data.apply(stat_encodings.get_possessionTeamScoreDiff, axis=1)
+        play_data['possessionTeamScoreDiff'] = play_data.apply(stat_encodings.get_possessionTeamScoreDiff, axis=1)
         
         # Encode yardsToGo
-        third_down_play_data['yardsToGo'] = third_down_play_data['yardsToGo'].apply(stat_encodings.encode_yardsToGo)
+        play_data['yardsToGo'] = play_data['yardsToGo'].apply(stat_encodings.encode_yardsToGo)
 
         # Encode passLength
-        third_down_play_data['passLength'] = third_down_play_data['passLength'].apply(stat_encodings.encode_passLength)
+        play_data['passLength'] = play_data['passLength'].apply(stat_encodings.encode_passLength)
 
         # Encode offenseFormation
-        third_down_play_data['offenseFormation'] = third_down_play_data['offenseFormation'].apply(stat_encodings.encode_offenseFormation)
+        play_data['offenseFormation'] = play_data['offenseFormation'].apply(stat_encodings.encode_offenseFormation)
 
         # Encode receiverAlignment
-        third_down_play_data['receiverAlignment'] = third_down_play_data['receiverAlignment'].apply(stat_encodings.encode_receiverAlignment)
+        play_data['receiverAlignment'] = play_data['receiverAlignment'].apply(stat_encodings.encode_receiverAlignment)
 
         # Encode passCoverage
-        third_down_play_data['pff_passCoverage'] = third_down_play_data['pff_passCoverage'].apply(stat_encodings.encode_passCoverage)
+        play_data['pff_passCoverage'] = play_data['pff_passCoverage'].apply(stat_encodings.encode_passCoverage)
 
         # Encode manZone
-        third_down_play_data['pff_manZone'] = third_down_play_data['pff_manZone'].apply(stat_encodings.encode_manZone)
+        play_data['pff_manZone'] = play_data['pff_manZone'].apply(stat_encodings.encode_manZone)
 
         # Encode targetY
-        third_down_play_data['targetY'] = third_down_play_data['targetY'].apply(stat_encodings.encode_targetY)
+        play_data['targetY'] = play_data['targetY'].apply(stat_encodings.encode_targetY)
 
         # Encode passResult
-        third_down_play_data['passResult'] = third_down_play_data['passResult'].apply(stat_encodings.encode_passResult)
+        play_data['passResult'] = play_data['passResult'].apply(stat_encodings.encode_passResult)
 
 
         # Encode offensive and defensive stats
         off_def_stats = ['offense_Cmp%', 'defense_Cmp%', 'offense_TD%', 'defense_TD%', 'offense_Int%', 'defense_Int%', 'offense_ANY/A', 'defense_ANY/A', 'offense_Rate', 'defense_Rate', 'offense_Sk%', 'defense_Sk%', 'offense_EXP', 'defense_EXP']
         for each in off_def_stats:
-            third_down_play_data[each] = third_down_play_data[each].astype(float)
-            third_down_play_data[each] = pd.qcut(third_down_play_data[each], q=4, labels=[0, 1, 2, 3]).astype(int)
+            play_data[each] = play_data[each].astype(float)
+            play_data[each] = pd.qcut(play_data[each], q=4, labels=[0, 1, 2, 3]).astype(int)
 
 
         # Remove leftover text columns
-        third_down_play_data.drop(columns=['preSnapHomeScore', 'preSnapVisitorScore', 'homeTeamAbbr', 'visitorTeamAbbr', 'possessionTeam', 'targetX', 'nonPossessionTeam', 'full_team_name'], inplace=True)
+        play_data.drop(columns=['preSnapHomeScore', 'preSnapVisitorScore', 'homeTeamAbbr', 'visitorTeamAbbr', 'possessionTeam', 'targetX', 'nonPossessionTeam', 'full_team_name'], inplace=True)
 
         # Remove all NaNs
-        third_down_play_data = third_down_play_data.replace([np.inf, -np.inf], np.nan).fillna(-1).astype(int)
+        play_data = play_data.replace([np.inf, -np.inf], np.nan).fillna(-1).astype(int)
 
+
+        # Encode passLocation using targetY and passLength
+        play_data['passLocation'] = play_data.apply(stat_encodings.encode_passLocation, axis=1)
+        play_data['passLocation'] = play_data['passLocation'].replace(-1, 9)
         
 
         # Add "firstDown" (True = 1/False = 0) column as y-label
-        third_down_play_data['firstDown'] = (third_down_play_data['yardsGained'] >= third_down_play_data['yardsToGo']).astype(int)
+        play_data['firstDown'] = (play_data['yardsGained'] >= play_data['yardsToGo']).astype(int)
 
         # Move stats to the end of the DataFrame
-        # third_down_play_data['targetY'] = third_down_play_data.pop('targetY')
-        # third_down_play_data['passLength'] = third_down_play_data.pop('passLength')
-        # third_down_play_data['pff_manZone'] = third_down_play_data['pff_manZone'].replace(-1, 2)
-        # third_down_play_data['pff_passCoverage'] = third_down_play_data.pop('pff_passCoverage')
-        # third_down_play_data['pff_passCoverage'] = third_down_play_data['pff_passCoverage'].replace(-1, 2)
-
-        # Encode passLocation using targetY and passLength
-        third_down_play_data['passLocation'] = third_down_play_data.apply(stat_encodings.encode_passLocation, axis=1)
-        third_down_play_data['passLocation'] = third_down_play_data['passLocation'].replace(-1, 9)
-        
+        # play_data['targetY'] = play_data.pop('targetY')
+        # play_data['passLength'] = play_data.pop('passLength')
+        # play_data['pff_manZone'] = play_data['pff_manZone'].replace(-1, 2)
+        # play_data['pff_passCoverage'] = play_data.pop('pff_passCoverage')
+        # play_data['pff_passCoverage'] = play_data['pff_passCoverage'].replace(-1, 2)
 
         
 
-        # third_down_play_data = third_down_play_data.drop(columns=['yardsGained', 'passLength', 'targetY', 'passResult'])
+        # play_data = play_data.drop(columns=['yardsGained', 'passLength', 'targetY', 'passResult'])
+
+
+
+        # features = ['down', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'offenseFormation', 'receiverAlignment', 'pff_passCoverage', 'pff_manZone', 'possessionTeamScoreDiff',
+        #             'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
+        #             'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP', 'passLocation']
+        # features = ['down', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'offenseFormation', 'receiverAlignment', 'pff_passCoverage', 'pff_manZone', 'possessionTeamScoreDiff',
+        #             'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
+        #             'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP', 'firstDown']
+        # play_data = play_data.filter(features)
 
 
 
 
-        print('Encoded 3rd Down Play Data\n', third_down_play_data)
+
+        print('Encoded 3rd Down Play Data\n', play_data)
+        print(play_data.columns)
+
 
         # Convert to Torch Tensor
-        third_down_play_tensor = torch.tensor(third_down_play_data.values, dtype=torch.float32)
+        third_down_play_tensor = torch.tensor(play_data.values, dtype=torch.float32)
 
         # Split into Tensor_X and Tensor_Y
         tensor_x = third_down_play_tensor[:, :-1] # All rows, all columns except last
@@ -151,6 +163,7 @@ class Passing3rdDown(nn.Module):
         print('tensor_y:', tensor_y.shape)
 
         maj_class_count = torch.bincount(tensor_y.to(torch.int)).max().item()
+        print(maj_class_count)
         print(f'Baseline Accuracy:\t{np.round((maj_class_count/tensor_y.shape[0])*100, 2)}%')
 
         # Normalize numerical features
@@ -187,13 +200,67 @@ class Passing3rdDown(nn.Module):
         print('train_x:', train_x.shape)
         print('train_y:', train_y.shape)
 
+
+        # Defensive Coverage Effectiveness: Which Coverages Minimize Yards Gained?
+        # 
+        #   
+
+        '''
+        Defensive Coverage Effectiveness: Which Coverages Minimize Yards Gained?
+        ================================================================================
+        Goal: Identify which defensive coverage types (pff_passCoverage, pff_manZone) are most effective at limiting passing yards.
+        Features: pff_passCoverage, pff_manZone, passLength, passResult, targetY, yardsGained, defense stats
+        - Train a regression model (Neural Network, XGBoost, Random Forest) to predict yardsGained based on coverage.
+        - Evaluate if certain defensive strategies reduce passing yardage more effectively.
+        - Compare performance across different offensive formations
+        Does Cover-2 or Cover-3 limit passing yards better than Man coverage?
+        Are certain coverages more vulnerable against deep passes?
+        How does offensive scheme influence defensive coverage effectiveness?
+        '''
+
+        '''
+        Optimize Pass Location for First Down Probability
+        ================================================================================
+        Goal: Determine the best pass location (short, medium, deep, left, middle, right) for a given game situation to maximize first down probability.
+        Features: All features except passLocation, Train a model to predict the best pass location instead of using actual data.
+        - Train a classification model (Neural Net, XGBoost, Decision Tree, etc.) with passLocation as the label.
+        - Compare predicted best locations vs. actual thrown locations.
+        - Perform counterfactual analysis: What if the QB had thrown to a different location?
+        Are certain locations systematically underused despite high success rates?
+        Which defensive schemes (pff_passCoverage) make certain locations more vulnerable?
+        '''
+        features = ['down', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'offenseFormation', 'receiverAlignment', 'pff_passCoverage', 'pff_manZone', 'possessionTeamScoreDiff',
+                    'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
+                    'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP', 'passLocation']
+
+        print('train_x:', train_x)
+        print('train_y:', train_y)
+
+        '''
+        Predict the Probability of a First Down (firstDown)
+        ================================================================================
+        Goal: Build a classification model to predict whether a pass play will result in a first down.
+        Features: down, yardsToGo, absoluteYardlineNumber, quarter offenseFormation, receiverAlignment, passLength, passResult
+                pff_passCoverage, pff_manZone, possessionTeamScoreDiff, passLocation, offense & defense metrics
+        - Train a Feedforward Neural Network (FNN) with softmax or sigmoid output.
+        - Use logistic regression, random forest, or XGBoost for comparison.
+        - Interpret feature importance: Which features matter most for getting a first down?
+        - Run SHAP analysis to understand how different inputs influence predictions.
+        Does pass location (short left, deep middle, etc.) influence success?
+        Which defensive coverages are most vulnerable to giving up first downs?
+        How does offensive ranking impact success probability?
+        '''
+        features = ['down', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'offenseFormation', 'receiverAlignment', 'pff_passCoverage', 'pff_manZone', 'possessionTeamScoreDiff',
+                    'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
+                    'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP']
+
         num_epochs = 1
         batch_size = 32
         dataset = TensorDataset(train_x, train_y)
         train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
         model = Passing3rdDown()
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        optimizer = optim.Adam(model.parameters(), lr=0.0001)
         loss_fn = nn.CrossEntropyLoss()
 
         for epoch in range(num_epochs):
@@ -221,4 +288,20 @@ class Passing3rdDown(nn.Module):
             test_accuracy = test_correct / test_y.shape[0]
 
         print(f"Test Accuracy FNN:\t{test_accuracy:.2%} (Train {train_accuracy:.2%})")
+
+    
+    def RandomForest(self):
+        plays_data = get_data.plays_2022()
+        train_x, train_y, test_x, test_y = self.process_data(plays_data, self.input_features)
+
+        print('train_x:', train_x.shape)
+        print('train_y:', train_y.shape)
+
+        rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
+        rf.fit(train_x, train_y)
+
+        y_pred_rf = rf.predict(test_x)
+
+        print("Random Forest Accuracy:", accuracy_score(test_y, y_pred_rf))
+        print(classification_report(test_y, y_pred_rf))
 

@@ -13,8 +13,8 @@ def main():
     # games_data = get_data.games_2022()
 
     passing_3rd_down_model = Passing3rdDown()
-    passing_3rd_down_model.train_model()
-    # passing_3rd_down_model.RandomForest()
+    # passing_3rd_down_model.train_model()
+    passing_3rd_down_model.RandomForest()
 
     # List all column values in the first row
     # 0 = Pass
