@@ -15,7 +15,8 @@ def main():
     passing_3rd_down_model = Passing3rdDown()
     # passing_3rd_down_model.train_model()
     # passing_3rd_down_model.RandomForest()
-    passing_3rd_down_model.estimated_rushers_on_play()
+    # passing_3rd_down_model.estimated_rushers_on_play()
+    passing_3rd_down_model.get_defense_coordinates_at_snap()
 
     # List all column values in the first row
     # 0 = Pass

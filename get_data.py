@@ -44,7 +44,11 @@ def players_2022():
     file_path = 'data/players_2022.csv'
     players = pd.read_csv(file_path)
     return players
-    
+
+def get_tracking_data_week_1():
+    file_path = 'data/tracking_week_1.csv'
+    tracking_data = pd.read_csv(file_path)
+    return tracking_data
 
 
 def play_by_play():

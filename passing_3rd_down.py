@@ -329,13 +329,11 @@ class Passing3rdDown(nn.Module):
         
         # blitz = 4387, 4396, 4439
 
-        # Look at: 4329, 4330, 4257, 4258, 4259, 4262
-
         # All-out Blitz examples:
         # 4439: https://youtu.be/3PAFAYNi3mA?si=7M3f01dS8XBsYLvZ&t=447
         # 4262: https://youtu.be/gUvHlA1-JWQ?si=3h3o05MGlAbRwLKK&t=217
 
-        start = 4262 #2678, 2690
+        start = 4439 #2678, 2690
         
         # blitzes = 0
         # for i in range(0, 5000):
@@ -368,6 +366,52 @@ class Passing3rdDown(nn.Module):
             #     blitzes += 1
 
         # print(f'Blitz Percentage: {np.round((blitzes/5000)*100, 3)}%')
+
+    def get_defense_coordinates_at_snap(self):
+        player_plays_data = get_data.player_play_2022()
+        play_data = get_data.plays_2022()
+        game_data = get_data.games_2022()
+        player_data = get_data.players_2022()
+        tracking_data = get_data.get_tracking_data_week_1()
+
+        start = 549
+
+        # Get Game State
+        player_play_data = player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']][start*22:(start*22)+22]
+        game_id = player_play_data['gameId'].iloc[0]
+        play_id = player_play_data['playId'].iloc[0]
+        game = game_data[game_data['gameId'] == game_id].iloc[0]
+        play = play_data[(play_data['playId'] == play_id) & (play_data['gameId'] == game_id)].iloc[0]
+        print('GAME ID:', game_id)
+        print('PLAY_ID:', play_id)
+        print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
+        print(f"{game['homeTeamAbbr']} {play['preSnapHomeScore']} - {play['preSnapVisitorScore']} {game['visitorTeamAbbr']} | {play['absoluteYardlineNumber']} yd line | {play['possessionTeam']}'s ball")
+        print(f"Q{play['quarter']} {play['playDescription']}")
+        print('======================================================================================================')
+
+        defensive_players_ids = player_play_data[player_play_data['teamAbbr'] != play['possessionTeam']]['nflId'].to_list()
+        print(defensive_players_ids)
+
+        for player_id in defensive_players_ids:
+            player_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
+                    (tracking_data['playId'] == play_id) & 
+                    (tracking_data['nflId'] == player_id) & 
+                    (tracking_data['frameType'] == 'SNAP')]
+            
+            player = player_data[player_data['nflId'] == player_id].iloc[0]
+            player_x_coord_at_snap = player_tracking_data['x'].iloc[0]
+            player_y_coord_at_snap = player_tracking_data['y'].iloc[0]
+            player_jersey_num = int(player_tracking_data['jerseyNumber'].iloc[0])
+            player_position = player['position']
+
+            play_dist_to_los = np.abs(play['absoluteYardlineNumber'] - player_x_coord_at_snap)
+            
+            # print('player_tracking_data:', player_tracking_data)
+            print(f"#{player_jersey_num} {player_position}\tdist from LoS: {np.round(play_dist_to_los, 4)},\ty:{player_y_coord_at_snap}")
+
+
+        # print(player_play_data)
+
 
         
 
