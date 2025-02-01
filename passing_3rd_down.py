@@ -326,9 +326,21 @@ class Passing3rdDown(nn.Module):
         game_data = get_data.games_2022()
         player_data = get_data.players_2022()
 
-        # Get Game State
+        
         # blitz = 4387, 4396, 4439
-        start = 4439 #2678, 2690
+
+        # Look at: 4329, 4330, 4257, 4258, 4259, 4262
+
+        # All-out Blitz examples:
+        # 4439: https://youtu.be/3PAFAYNi3mA?si=7M3f01dS8XBsYLvZ&t=447
+        # 4262: https://youtu.be/gUvHlA1-JWQ?si=3h3o05MGlAbRwLKK&t=217
+
+        start = 4262 #2678, 2690
+        
+        # blitzes = 0
+        # for i in range(0, 5000):
+
+        # Get Game State
         player_play_data = player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId']][start*22:(start*22)+22]
         game_id = player_play_data['gameId'].iloc[0]
         play_id = player_play_data['playId'].iloc[0]
@@ -344,14 +356,18 @@ class Passing3rdDown(nn.Module):
         # Get defensive players whose getOffTimeAsPassRusher is not Nan or causedPressure
         estimate_rushers = player_play_data[pd.notna(player_play_data['getOffTimeAsPassRusher']) | player_play_data['causedPressure'] == True]
         estimated_rushers_count = estimate_rushers.shape[0]
-        print(f'Estimated rushers {"(BLITZ!!!) " if estimated_rushers_count >= 5 else " "}({estimated_rushers_count}):')
+        print(f'Estimated rushers {"(BLITZ🚨) " if estimated_rushers_count >= 5 else " "}({estimated_rushers_count}):')
         for i,rusher in estimate_rushers.iterrows():
             player_id = int(rusher['nflId'])
             player = player_data[player_data['nflId'] == player_id].iloc[0]
             getOffTimeAsPassRusher = estimate_rushers[estimate_rushers['nflId'] == player_id]['getOffTimeAsPassRusher'].iloc[0]
             causedPressure = estimate_rushers[estimate_rushers['nflId'] == player_id]['causedPressure'].iloc[0]
             print(f"{player['position']}\t{player['displayName'].split(' ')[0][0]}. {player['displayName'].split(' ')[1]}\t{np.round(getOffTimeAsPassRusher, 6)} getOffTimeAsPassRusher\tcausedPressure: {causedPressure}")
+                
+            # if estimated_rushers_count >= 5:
+            #     blitzes += 1
 
+        # print(f'Blitz Percentage: {np.round((blitzes/5000)*100, 3)}%')
 
         
 
