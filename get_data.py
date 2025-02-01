@@ -34,6 +34,16 @@ def offense_2022():
     passing_offense = pd.read_csv(file_path)
 
     return offense, passing_offense
+
+def player_play_2022():
+    file_path = 'data/player_play_2022.csv'
+    player_play = pd.read_csv(file_path)
+    return player_play
+
+def players_2022():
+    file_path = 'data/players_2022.csv'
+    players = pd.read_csv(file_path)
+    return players
     
 
 

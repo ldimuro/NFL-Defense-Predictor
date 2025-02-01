@@ -14,7 +14,8 @@ def main():
 
     passing_3rd_down_model = Passing3rdDown()
     # passing_3rd_down_model.train_model()
-    passing_3rd_down_model.RandomForest()
+    # passing_3rd_down_model.RandomForest()
+    passing_3rd_down_model.estimated_rushers_on_play()
 
     # List all column values in the first row
     # 0 = Pass
@@ -23,7 +24,7 @@ def main():
     # for column, value in first_row.items():
     #     print(f'{column}: {value}')
 
-    print('================================================================')
+    print('======================================================================================================')
 
     # IDEAS:
     # - Correlation between QB Height and batted passes?

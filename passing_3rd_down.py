@@ -253,6 +253,20 @@ class Passing3rdDown(nn.Module):
         features = ['down', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'offenseFormation', 'receiverAlignment', 'pff_passCoverage', 'pff_manZone', 'possessionTeamScoreDiff',
                     'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
                     'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP']
+        
+
+        '''
+        Predicting Sack Probability Given Pre-Snap Factors
+        ================================================================================
+        Goal: QB pressure drives passing success. This project predicts whether a pass will result in a sack based on game context
+        Features: [Offense Formation, Dropback Type, Down, YardsToGo, PossessionTeamScoreDiff, Defensive Stats (QB Hits, TFL, Sack Rate)]
+        Binary Classification (1 = Sack, 0 = No Sack)
+
+        '''
+        
+
+
+
 
         num_epochs = 1
         batch_size = 32
@@ -304,4 +318,40 @@ class Passing3rdDown(nn.Module):
 
         print("Random Forest Accuracy:", accuracy_score(test_y, y_pred_rf))
         print(classification_report(test_y, y_pred_rf))
+
+    
+    def estimated_rushers_on_play(self):
+        player_plays_data = get_data.player_play_2022()
+        play_data = get_data.plays_2022()
+        game_data = get_data.games_2022()
+        player_data = get_data.players_2022()
+
+        # Get Game State
+        # blitz = 4387, 4396, 4439
+        start = 4439 #2678, 2690
+        player_play_data = player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId']][start*22:(start*22)+22]
+        game_id = player_play_data['gameId'].iloc[0]
+        play_id = player_play_data['playId'].iloc[0]
+        game = game_data[game_data['gameId'] == game_id].iloc[0]
+        play = play_data[(play_data['playId'] == play_id) & (play_data['gameId'] == game_id)].iloc[0]
+        print('GAME ID:', game_id)
+        print('PLAY_ID:', play_id)
+        print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
+        print(f"{game['homeTeamAbbr']} {play['preSnapHomeScore']} - {play['preSnapVisitorScore']} {game['visitorTeamAbbr']} | {play['absoluteYardlineNumber']} yd line")
+        print(f"Q{play['quarter']} {play['playDescription']}")
+        print('======================================================================================================')
+
+        # Get defensive players whose getOffTimeAsPassRusher is not Nan or causedPressure
+        estimate_rushers = player_play_data[pd.notna(player_play_data['getOffTimeAsPassRusher']) | player_play_data['causedPressure'] == True]
+        estimated_rushers_count = estimate_rushers.shape[0]
+        print(f'Estimated rushers {"(BLITZ!!!) " if estimated_rushers_count >= 5 else " "}({estimated_rushers_count}):')
+        for i,rusher in estimate_rushers.iterrows():
+            player_id = int(rusher['nflId'])
+            player = player_data[player_data['nflId'] == player_id].iloc[0]
+            getOffTimeAsPassRusher = estimate_rushers[estimate_rushers['nflId'] == player_id]['getOffTimeAsPassRusher'].iloc[0]
+            causedPressure = estimate_rushers[estimate_rushers['nflId'] == player_id]['causedPressure'].iloc[0]
+            print(f"{player['position']}\t{player['displayName'].split(' ')[0][0]}. {player['displayName'].split(' ')[1]}\t{np.round(getOffTimeAsPassRusher, 6)} getOffTimeAsPassRusher\tcausedPressure: {causedPressure}")
+
+
+        
 
