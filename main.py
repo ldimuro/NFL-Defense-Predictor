@@ -13,7 +13,7 @@ def main():
     # passing_down_model.train_model()
     # passing_down_model.RandomForest()
     # passing_down_model.estimated_rushers_on_play()
-    passing_down_model.get_defensive_features_at_snap()
+    passing_down_model.get_defensive_features_for_passing_plays()
 
     # List all column values in the first row
     # 0 = Pass

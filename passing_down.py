@@ -1,20 +1,14 @@
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
 import numpy as np
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 
 import get_data
 import stat_encodings
 
-class PassingDown(nn.Module):
+class PassingDown():
 
     def __init__(self):
-        super(PassingDown, self).__init__()
+        # super(PassingDown, self).__init__()
 
         # self.games_data = games_data
 
@@ -22,14 +16,6 @@ class PassingDown(nn.Module):
 
         # self.train_x, self.train_y, self.test_x, self.test_y = self.process_data(plays_data, self.input_features)
 
-        # Layers
-        self.linear_layer1 = nn.Linear(28, 32)
-        self.relu1 = nn.ReLU()
-        self.linear_layer2 = nn.Linear(32, 16)
-        self.relu2 = nn.ReLU()
-        self.linear_layer3 = nn.Linear(16, 8)
-        self.sigmoid = nn.Sigmoid()
-        self.output_layer = nn.Linear(8, 1)
 
     def process_data(self, data, input_features, normalize=True):
         data = pd.DataFrame(data)
@@ -185,155 +171,23 @@ class PassingDown(nn.Module):
         return train_x, train_y, test_x, test_y
     
 
-    def forward(self, x):
-        x = self.relu1(self.linear_layer1(x))
-        x = self.relu2(self.linear_layer2(x))
-        x = self.sigmoid(self.linear_layer3(x))
-        x = self.output_layer(x)
-        return x
-    
-
-    def train_model(self):
-        plays_data = get_data.plays_2022()
-        train_x, train_y, test_x, test_y = self.process_data(plays_data, self.input_features)
-
-        print('train_x:', train_x.shape)
-        print('train_y:', train_y.shape)
-
-
-        # Defensive Coverage Effectiveness: Which Coverages Minimize Yards Gained?
-        # 
-        #   
-
-        '''
-        Defensive Coverage Effectiveness: Which Coverages Minimize Yards Gained?
-        ================================================================================
-        Goal: Identify which defensive coverage types (pff_passCoverage, pff_manZone) are most effective at limiting passing yards.
-        Features: pff_passCoverage, pff_manZone, passLength, passResult, targetY, yardsGained, defense stats
-        - Train a regression model (Neural Network, XGBoost, Random Forest) to predict yardsGained based on coverage.
-        - Evaluate if certain defensive strategies reduce passing yardage more effectively.
-        - Compare performance across different offensive formations
-        Does Cover-2 or Cover-3 limit passing yards better than Man coverage?
-        Are certain coverages more vulnerable against deep passes?
-        How does offensive scheme influence defensive coverage effectiveness?
-        '''
-
-        '''
-        Optimize Pass Location for First Down Probability
-        ================================================================================
-        Goal: Determine the best pass location (short, medium, deep, left, middle, right) for a given game situation to maximize first down probability.
-        Features: All features except passLocation, Train a model to predict the best pass location instead of using actual data.
-        - Train a classification model (Neural Net, XGBoost, Decision Tree, etc.) with passLocation as the label.
-        - Compare predicted best locations vs. actual thrown locations.
-        - Perform counterfactual analysis: What if the QB had thrown to a different location?
-        Are certain locations systematically underused despite high success rates?
-        Which defensive schemes (pff_passCoverage) make certain locations more vulnerable?
-        '''
-        features = ['down', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'offenseFormation', 'receiverAlignment', 'pff_passCoverage', 'pff_manZone', 'possessionTeamScoreDiff',
-                    'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
-                    'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP', 'passLocation']
-
-        print('train_x:', train_x)
-        print('train_y:', train_y)
-
-        '''
-        Predict the Probability of a First Down (firstDown)
-        ================================================================================
-        Goal: Build a classification model to predict whether a pass play will result in a first down.
-        Features: down, yardsToGo, absoluteYardlineNumber, quarter offenseFormation, receiverAlignment, passLength, passResult
-                pff_passCoverage, pff_manZone, possessionTeamScoreDiff, passLocation, offense & defense metrics
-        - Train a Feedforward Neural Network (FNN) with softmax or sigmoid output.
-        - Use logistic regression, random forest, or XGBoost for comparison.
-        - Interpret feature importance: Which features matter most for getting a first down?
-        - Run SHAP analysis to understand how different inputs influence predictions.
-        Does pass location (short left, deep middle, etc.) influence success?
-        Which defensive coverages are most vulnerable to giving up first downs?
-        How does offensive ranking impact success probability?
-        '''
-        features = ['down', 'yardsToGo', 'absoluteYardlineNumber', 'quarter', 'offenseFormation', 'receiverAlignment', 'pff_passCoverage', 'pff_manZone', 'possessionTeamScoreDiff',
-                    'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
-                    'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP']
-        
-
-        '''
-        Predicting Sack Probability Given Pre-Snap Factors
-        ================================================================================
-        Goal: QB pressure drives passing success. This project predicts whether a pass will result in a sack based on game context
-        Features: [Offense Formation, Dropback Type, Down, YardsToGo, PossessionTeamScoreDiff, Defensive Stats (QB Hits, TFL, Sack Rate)]
-        Binary Classification (1 = Sack, 0 = No Sack)
-
-        '''
-        
-
-
-
-
-        num_epochs = 1
-        batch_size = 32
-        dataset = TensorDataset(train_x, train_y)
-        train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-        model = PassingDown()
-        optimizer = optim.Adam(model.parameters(), lr=0.0001)
-        loss_fn = nn.CrossEntropyLoss()
-
-        for epoch in range(num_epochs):
-            for batch_x, batch_y in train_loader:
-                optimizer.zero_grad()  # Zero gradients
-
-                # Forward pass with the entire training dataset
-                y_pred = model(batch_x) # Predict for all training data
-                loss = loss_fn(y_pred.squeeze(), batch_y) # Compute loss for all data
-
-                loss.backward() # Backward pass
-                optimizer.step() # Update weights
-
-                # Calculate accuracy for the training set
-                with torch.no_grad():
-                    correct = (torch.argmax(y_pred, dim=1) == batch_y).sum().item()
-                    train_accuracy = correct / batch_y.shape[0]
-
-                print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Accuracy: {train_accuracy:.2%}")
-
-        model.eval()  # Switch to evaluation mode
-        with torch.no_grad():  # Disable gradients for evaluation
-            y_test_pred = model(test_x)
-            test_correct = (torch.argmax(y_test_pred, dim=1) == test_y).sum().item()
-            test_accuracy = test_correct / test_y.shape[0]
-
-        print(f"Test Accuracy FNN:\t{test_accuracy:.2%} (Train {train_accuracy:.2%})")
-
-    
-    def RandomForest(self):
-        plays_data = get_data.plays_2022()
-        train_x, train_y, test_x, test_y = self.process_data(plays_data, self.input_features)
-
-        print('train_x:', train_x.shape)
-        print('train_y:', train_y.shape)
-
-        rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
-        rf.fit(train_x, train_y)
-
-        y_pred_rf = rf.predict(test_x)
-
-        print("Random Forest Accuracy:", accuracy_score(test_y, y_pred_rf))
-        print(classification_report(test_y, y_pred_rf))
-
-    
     def estimated_rushers_on_play(self):
         player_plays_data = get_data.player_play_2022()
         play_data = get_data.plays_2022()
         game_data = get_data.games_2022()
         player_data = get_data.players_2022()
 
-        
+        # Filter Play data by Passing plays only
+        play_data = play_data[play_data['passResult'].notna()]
+        print('plays:', play_data)
+
         # blitz = 4387, 4396, 4439
 
         # All-out Blitz examples:
         # 4439: https://youtu.be/3PAFAYNi3mA?si=7M3f01dS8XBsYLvZ&t=447
         # 4262: https://youtu.be/gUvHlA1-JWQ?si=3h3o05MGlAbRwLKK&t=217
 
-        start = 4439 #2678, 2690
+        start = 235 #2678, 2690
         
         # blitzes = 0
         # for i in range(0, 5000):
@@ -367,15 +221,24 @@ class PassingDown(nn.Module):
 
         # print(f'Blitz Percentage: {np.round((blitzes/5000)*100, 3)}%')
 
-    def get_defensive_features_at_snap(self):
-        print('getting data')
-        player_plays_data = get_data.player_play_2022()
-        play_data = get_data.plays_2022()
-        game_data = get_data.games_2022()
-        player_data = get_data.players_2022()
-        tracking_data = get_data.get_tracking_data_week_1()
+    def get_defensive_features_at_snap(self, play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data):
+        # print('getting data')
+        # player_plays_data = get_data.player_play_2022()
+        # play_data = get_data.plays_2022()
+        # game_data = get_data.games_2022()
+        # player_data = get_data.players_2022()
+        # tracking_data = get_data.get_tracking_data_week_1()
 
-        start = 327#549
+        # Filter Play data by Passing plays only
+        # play_data = play_data[play_data['passResult'].notna()]
+        # print('plays:', play_data)
+
+        start = play_id #327
+        temp = player_plays_data[(player_plays_data['playId'] == play_id) & (player_plays_data['gameId'] == game_id)]
+        # print('XXX:', temp)
+        first_row_play_index = temp.index[0]
+        start = first_row_play_index
+        # print(first_row_play_index)
 
         # FEATURES TO EXTRACT (to predict pre-snap defensive shell)
         # - Each defender's distance to LOS (11 features)
@@ -397,12 +260,23 @@ class PassingDown(nn.Module):
 
         print('getting state')
 
+        # print(player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']])
+
         # Get Game State
-        player_play_data = player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']][start*22:(start*22)+22]
-        game_id = player_play_data['gameId'].iloc[0]
-        play_id = player_play_data['playId'].iloc[0]
+        # start = 327
+        print('BEFORE\n:', player_plays_data)
+        player_play_data = player_plays_data[['gameId', 'playId', 'nflId', 'teamAbbr']][start:start+22]
+
+        print('start:', start)
+
+        print(f'all 22 players on play_{play_id}:\n{player_play_data}')
+
+
+        # game_id = player_play_data['gameId'].iloc[0]
+        # play_id = player_play_data['playId'].iloc[0]
         game = game_data[game_data['gameId'] == game_id].iloc[0]
-        play = play_data[(play_data['playId'] == play_id) & (play_data['gameId'] == game_id)].iloc[0]
+        # print(passing_play_data)
+        play = passing_play_data[(passing_play_data['playId'] == play_id) & (passing_play_data['gameId'] == game_id)].iloc[0]
         print('GAME ID:', game_id)
         print('PLAY_ID:', play_id)
         print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
@@ -412,7 +286,9 @@ class PassingDown(nn.Module):
         print('======================================================================================================')
 
         # Extract Center position to get y-axis of ball placement at the snap
+        print(player_play_data)
         offensive_ids = player_play_data[player_play_data['teamAbbr'] == play['possessionTeam']]['nflId'].to_list()
+        print('offensive_ids:', offensive_ids)
         center_id = 0
         for id in offensive_ids:
             player = player_data[player_data['nflId'] == id].iloc[0]
@@ -420,10 +296,14 @@ class PassingDown(nn.Module):
                 center_id = id
                 break
 
+        print('center:', center_id)
+        print(tracking_data)
+
         center_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
                     (tracking_data['playId'] == play_id) & 
                     (tracking_data['nflId'] == center_id) & 
                     (tracking_data['frameType'] == 'SNAP')]
+        print('center_tracking_data:\n', center_tracking_data)
         ball_y_coord = center_tracking_data['y'].iloc[0]
         print('ball position (y-axis):', ball_y_coord)
 
@@ -468,7 +348,11 @@ class PassingDown(nn.Module):
             # Get depths of Safeties
             if player_position == 'FS' or player_position == 'SS':
                 if player_dist_to_los > deepest_safety_depth:
-                    deepest_safety_depth = player_dist_to_los
+                    if deepest_safety_depth == -1.0:
+                        deepest_safety_depth = player_dist_to_los
+                    else:
+                        next_deepest_safety_depth = deepest_safety_depth
+                        deepest_safety_depth = player_dist_to_los
                 elif player_dist_to_los > next_deepest_safety_depth:
                     next_deepest_safety_depth = player_dist_to_los
 
@@ -495,8 +379,8 @@ class PassingDown(nn.Module):
 
 
             # Record player coordinates into features
-            features[f'defender_{i+1}_x'] = player_dist_to_los
-            features[f'defender_{i+1}_y'] = player_y_coord_at_snap
+            features[f'defender{i+1}_x'] = player_dist_to_los
+            features[f'defender{i+1}_y'] = player_y_coord_at_snap
             # position_count = positions_analyzed.count(player_position)
             # features[f'{player_position}{position_count}_x'] = player_dist_to_los
             # features[f'{player_position}{position_count}_y'] = player_y_coord_at_snap
@@ -533,6 +417,44 @@ class PassingDown(nn.Module):
 
 
         # print(player_play_data)
+
+
+    def get_defensive_features_for_passing_plays(self):
+        print('getting data')
+        player_plays_data = get_data.player_play_2022()
+        play_data = get_data.plays_2022()
+        game_data = get_data.games_2022()
+        player_data = get_data.players_2022()
+        tracking_data = get_data.get_tracking_data_week_1()
+
+        # Filter Play data by Passing plays only
+        passing_play_data = play_data[play_data['passResult'].notna()]
+
+        z = 0
+        for i,passing_play in passing_play_data.iterrows():
+            z += 1
+            if z > 6:
+                break
+
+            play_id = passing_play['playId']
+            game_id = passing_play['gameId']
+            print('play_id:', play_id)
+            print('game_id:', game_id)
+            # print(player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']])
+            # target = player_plays_data[(player_plays_data['playId'] == play_id) & (passing_play_data['gameId'] == game_id)]
+            # target = player_plays_data[(player_plays_data['playId'] == play_id) & (player_plays_data['gameId'] == game_id)]
+            # print(target)
+            # first_row_play_index = target.index[0]
+            # print(first_row_play_index)
+
+            self.get_defensive_features_at_snap(play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data)
+
+        # print('passing_play_data\n:', passing_play_data)
+
+        # self.get_defensive_features_at_snap(235, player_plays_data, passing_play_data, game_data, player_data, tracking_data)
+
+
+
 
 
         
