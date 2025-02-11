@@ -1,6 +1,6 @@
 import numpy as np
 import get_data
-from passing_3rd_down import Passing3rdDown
+from passing_down import PassingDown
 
 def main():
     # PRO FOOTBALL REFERENCE
@@ -9,11 +9,11 @@ def main():
     # print(kyler_murray_stats)
     # print(cardinals_2008_stats)
 
-    passing_3rd_down_model = Passing3rdDown()
-    # passing_3rd_down_model.train_model()
-    # passing_3rd_down_model.RandomForest()
-    # passing_3rd_down_model.estimated_rushers_on_play()
-    passing_3rd_down_model.get_defensive_features_at_snap()
+    passing_down_model = PassingDown()
+    # passing_down_model.train_model()
+    # passing_down_model.RandomForest()
+    # passing_down_model.estimated_rushers_on_play()
+    passing_down_model.get_defensive_features_at_snap()
 
     # List all column values in the first row
     # 0 = Pass

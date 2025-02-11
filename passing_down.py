@@ -11,10 +11,10 @@ from sklearn.model_selection import train_test_split
 import get_data
 import stat_encodings
 
-class Passing3rdDown(nn.Module):
+class PassingDown(nn.Module):
 
     def __init__(self):
-        super(Passing3rdDown, self).__init__()
+        super(PassingDown, self).__init__()
 
         # self.games_data = games_data
 
@@ -273,7 +273,7 @@ class Passing3rdDown(nn.Module):
         dataset = TensorDataset(train_x, train_y)
         train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-        model = Passing3rdDown()
+        model = PassingDown()
         optimizer = optim.Adam(model.parameters(), lr=0.0001)
         loss_fn = nn.CrossEntropyLoss()
 
@@ -444,6 +444,8 @@ class Passing3rdDown(nn.Module):
         outside_field_count = 0
         middle_thresh = 10
 
+        near_los_thresh = 1.5 # Near LoS = within 1.5 yards of LoS
+        in_box_x_thresh = 5 # In box = within 5 yards of LoS, within 10 yards on either side of ball
         players_near_los = 0
         players_in_box = 0
 
@@ -481,11 +483,11 @@ class Passing3rdDown(nn.Module):
                 outside_field_count += 1
 
             # Get # of players near the line of scrimmage
-            if player_dist_to_los <= 1.5:
+            if player_dist_to_los <= near_los_thresh:
                 players_near_los += 1
 
             # Get # of players in the box (within 5 yards of LoS and within 10 yards of the ball placement (y-axis))
-            if player_dist_to_los <= 5 and np.round(np.abs(player_y_coord_at_snap - ball_y_coord), 4) <= middle_thresh:
+            if player_dist_to_los <= in_box_x_thresh and np.round(np.abs(player_y_coord_at_snap - ball_y_coord), 4) <= middle_thresh:
                 players_in_box += 1
 
 
