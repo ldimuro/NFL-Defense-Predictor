@@ -9,14 +9,11 @@ def main():
     # print(kyler_murray_stats)
     # print(cardinals_2008_stats)
 
-    plays_data = get_data.plays_2022()
-    # games_data = get_data.games_2022()
-
     passing_3rd_down_model = Passing3rdDown()
     # passing_3rd_down_model.train_model()
     # passing_3rd_down_model.RandomForest()
     # passing_3rd_down_model.estimated_rushers_on_play()
-    passing_3rd_down_model.get_defense_coordinates_at_snap()
+    passing_3rd_down_model.get_defensive_features_at_snap()
 
     # List all column values in the first row
     # 0 = Pass

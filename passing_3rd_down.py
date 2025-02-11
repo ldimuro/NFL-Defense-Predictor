@@ -367,14 +367,35 @@ class Passing3rdDown(nn.Module):
 
         # print(f'Blitz Percentage: {np.round((blitzes/5000)*100, 3)}%')
 
-    def get_defense_coordinates_at_snap(self):
+    def get_defensive_features_at_snap(self):
+        print('getting data')
         player_plays_data = get_data.player_play_2022()
         play_data = get_data.plays_2022()
         game_data = get_data.games_2022()
         player_data = get_data.players_2022()
         tracking_data = get_data.get_tracking_data_week_1()
 
-        start = 549
+        start = 327#549
+
+        # FEATURES TO EXTRACT (to predict pre-snap defensive shell)
+        # - Each defender's distance to LOS (11 features)
+        # - Each defender's y-coordinate (11 features)
+        # - Deepest safety yardage (1 feature)
+        # - 2nd deepest safety yardage (1 feature)
+        # - Avg Defender depths (1 feature)
+        # - Std Dev of defender depths (how spread out the defense is) (1 feature)
+        # - Avg CB depth (1 feature)
+        # - Min CB depth (1 feature)
+        # - # of defenders inside hashmarks (1 feature)
+        # - # of defenders outside numbers (1 feature)
+        # - # of defenders within 1.5 yards of LOS (1 feature)
+        # - # of defenders in the box (within 5 Yards of LOS & Inside Hashmarks) (1 feature)
+        # POTENTIAL OTHER FEATURES:
+        # - defender movement during offensive motion (1 feature)
+        # - Safeties' Horizontal Spread (1 feature)
+        
+
+        print('getting state')
 
         # Get Game State
         player_play_data = player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']][start*22:(start*22)+22]
@@ -387,12 +408,46 @@ class Passing3rdDown(nn.Module):
         print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
         print(f"{game['homeTeamAbbr']} {play['preSnapHomeScore']} - {play['preSnapVisitorScore']} {game['visitorTeamAbbr']} | {play['absoluteYardlineNumber']} yd line | {play['possessionTeam']}'s ball")
         print(f"Q{play['quarter']} {play['playDescription']}")
+        # print(play)
         print('======================================================================================================')
 
-        defensive_players_ids = player_play_data[player_play_data['teamAbbr'] != play['possessionTeam']]['nflId'].to_list()
-        print(defensive_players_ids)
+        # Extract Center position to get y-axis of ball placement at the snap
+        offensive_ids = player_play_data[player_play_data['teamAbbr'] == play['possessionTeam']]['nflId'].to_list()
+        center_id = 0
+        for id in offensive_ids:
+            player = player_data[player_data['nflId'] == id].iloc[0]
+            if player['position'] == 'C':
+                center_id = id
+                break
 
-        for player_id in defensive_players_ids:
+        center_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
+                    (tracking_data['playId'] == play_id) & 
+                    (tracking_data['nflId'] == center_id) & 
+                    (tracking_data['frameType'] == 'SNAP')]
+        ball_y_coord = center_tracking_data['y'].iloc[0]
+        print('ball position (y-axis):', ball_y_coord)
+
+        defensive_players_ids = player_play_data[player_play_data['teamAbbr'] != play['possessionTeam']]['nflId'].to_list()
+
+        features = {}
+
+        positions_analyzed = []
+
+        deepest_safety_depth = -1.0
+        next_deepest_safety_depth = -1.0
+
+        all_depths = []
+        cb_depths = []
+
+        # Count how many players are inside/outside 10 yards of the ball's y-axis
+        middle_field_count = 0
+        outside_field_count = 0
+        middle_thresh = 10
+
+        players_near_los = 0
+        players_in_box = 0
+
+        for i,player_id in enumerate(defensive_players_ids):
             player_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
                     (tracking_data['playId'] == play_id) & 
                     (tracking_data['nflId'] == player_id) & 
@@ -403,11 +458,76 @@ class Passing3rdDown(nn.Module):
             player_y_coord_at_snap = player_tracking_data['y'].iloc[0]
             player_jersey_num = int(player_tracking_data['jerseyNumber'].iloc[0])
             player_position = player['position']
+            player_dist_to_los = np.round(np.abs(play['absoluteYardlineNumber'] - player_x_coord_at_snap), 4)
 
-            play_dist_to_los = np.abs(play['absoluteYardlineNumber'] - player_x_coord_at_snap)
+            # Get depths of all defenders
+            all_depths.append(player_dist_to_los)
+
+            # Get depths of Safeties
+            if player_position == 'FS' or player_position == 'SS':
+                if player_dist_to_los > deepest_safety_depth:
+                    deepest_safety_depth = player_dist_to_los
+                elif player_dist_to_los > next_deepest_safety_depth:
+                    next_deepest_safety_depth = player_dist_to_los
+
+            # Get CB depths
+            if player_position == 'CB':
+                cb_depths.append(player_dist_to_los)
+
+            # Get # of players in middle of the field and outside
+            if np.round(np.abs(player_y_coord_at_snap - ball_y_coord), 4) <= middle_thresh:
+                middle_field_count += 1
+            else:
+                outside_field_count += 1
+
+            # Get # of players near the line of scrimmage
+            if player_dist_to_los <= 1.5:
+                players_near_los += 1
+
+            # Get # of players in the box (within 5 yards of LoS and within 10 yards of the ball placement (y-axis))
+            if player_dist_to_los <= 5 and np.round(np.abs(player_y_coord_at_snap - ball_y_coord), 4) <= middle_thresh:
+                players_in_box += 1
+
+
+            positions_analyzed.append(player_position)
+
+
+            # Record player coordinates into features
+            features[f'defender_{i+1}_x'] = player_dist_to_los
+            features[f'defender_{i+1}_y'] = player_y_coord_at_snap
+            # position_count = positions_analyzed.count(player_position)
+            # features[f'{player_position}{position_count}_x'] = player_dist_to_los
+            # features[f'{player_position}{position_count}_y'] = player_y_coord_at_snap
+
+            print(f"#{player_jersey_num} {player_position}\tdist from LoS: {player_dist_to_los},\ty:{player_y_coord_at_snap}")
+
             
-            # print('player_tracking_data:', player_tracking_data)
-            print(f"#{player_jersey_num} {player_position}\tdist from LoS: {np.round(play_dist_to_los, 4)},\ty:{player_y_coord_at_snap}")
+            
+        # Combine all input features
+        features['deepest_safety_depth'] = deepest_safety_depth
+        features['next_deepest_safety_depth'] = next_deepest_safety_depth
+        features['middle_field_count'] = middle_field_count
+        features['outside_field_count'] = outside_field_count
+        features['players_near_los'] = players_near_los
+        features['players_in_box'] = players_in_box
+        features['avg_defender_depth'] = np.round(np.mean(all_depths), 4)
+        features['std_defender_depth'] = np.round(np.std(all_depths), 4)
+        features['avg_cb_depth'] = np.round(np.mean(cb_depths), 4)
+        features['min_cb_depth'] = np.min(cb_depths)
+
+        # print('ESTIMATED RUSHERS:', estimated_rushers_count)
+        print(features)
+        print('Avg defender depth:', np.round(np.mean(all_depths), 4))
+        print('Std defender depth:', np.round(np.std(all_depths), 4))
+        print('Deepest safety depth:', deepest_safety_depth)
+        print('Next deepest safety:', next_deepest_safety_depth)
+        print('Players in middle of the field:', middle_field_count)
+        print('Players in outside of the field:', outside_field_count)
+        print('Players near LoS:', players_near_los)
+        print('Players in box:', players_in_box)
+        print('Avg CB depth:', np.mean(cb_depths))
+        print('Min CB depth:', np.min(cb_depths))
+        
 
 
         # print(player_play_data)
