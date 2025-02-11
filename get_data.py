@@ -50,6 +50,11 @@ def get_tracking_data_week_1():
     tracking_data = pd.read_csv(file_path)
     return tracking_data
 
+def get_tracking_data_week_7():
+    file_path = 'data/tracking_week_7.csv'
+    tracking_data = pd.read_csv(file_path)
+    return tracking_data
+
 
 def play_by_play():
     # Load the CSV file into a DataFrame

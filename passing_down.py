@@ -196,14 +196,7 @@ class PassingDown():
         player_play_data = player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId']][start*22:(start*22)+22]
         game_id = player_play_data['gameId'].iloc[0]
         play_id = player_play_data['playId'].iloc[0]
-        game = game_data[game_data['gameId'] == game_id].iloc[0]
-        play = play_data[(play_data['playId'] == play_id) & (play_data['gameId'] == game_id)].iloc[0]
-        print('GAME ID:', game_id)
-        print('PLAY_ID:', play_id)
-        print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
-        print(f"{game['homeTeamAbbr']} {play['preSnapHomeScore']} - {play['preSnapVisitorScore']} {game['visitorTeamAbbr']} | {play['absoluteYardlineNumber']} yd line")
-        print(f"Q{play['quarter']} {play['playDescription']}")
-        print('======================================================================================================')
+        self.print_game_state(play_id, game_id, game_data, play_data)
 
         # Get defensive players whose getOffTimeAsPassRusher is not Nan or causedPressure
         estimate_rushers = player_play_data[pd.notna(player_play_data['getOffTimeAsPassRusher']) | player_play_data['causedPressure'] == True]
@@ -222,17 +215,6 @@ class PassingDown():
         # print(f'Blitz Percentage: {np.round((blitzes/5000)*100, 3)}%')
 
     def get_defensive_features_at_snap(self, play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data):
-        # print('getting data')
-        # player_plays_data = get_data.player_play_2022()
-        # play_data = get_data.plays_2022()
-        # game_data = get_data.games_2022()
-        # player_data = get_data.players_2022()
-        # tracking_data = get_data.get_tracking_data_week_1()
-
-        # Filter Play data by Passing plays only
-        # play_data = play_data[play_data['passResult'].notna()]
-        # print('plays:', play_data)
-
         start = play_id #327
         temp = player_plays_data[(player_plays_data['playId'] == play_id) & (player_plays_data['gameId'] == game_id)]
         # print('XXX:', temp)
@@ -271,19 +253,9 @@ class PassingDown():
 
         print(f'all 22 players on play_{play_id}:\n{player_play_data}')
 
+        self.print_game_state(play_id, game_id, game_data, passing_play_data)
 
-        # game_id = player_play_data['gameId'].iloc[0]
-        # play_id = player_play_data['playId'].iloc[0]
-        game = game_data[game_data['gameId'] == game_id].iloc[0]
-        # print(passing_play_data)
         play = passing_play_data[(passing_play_data['playId'] == play_id) & (passing_play_data['gameId'] == game_id)].iloc[0]
-        print('GAME ID:', game_id)
-        print('PLAY_ID:', play_id)
-        print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
-        print(f"{game['homeTeamAbbr']} {play['preSnapHomeScore']} - {play['preSnapVisitorScore']} {game['visitorTeamAbbr']} | {play['absoluteYardlineNumber']} yd line | {play['possessionTeam']}'s ball")
-        print(f"Q{play['quarter']} {play['playDescription']}")
-        # print(play)
-        print('======================================================================================================')
 
         # Extract Center position to get y-axis of ball placement at the snap
         print(player_play_data)
@@ -425,7 +397,7 @@ class PassingDown():
         play_data = get_data.plays_2022()
         game_data = get_data.games_2022()
         player_data = get_data.players_2022()
-        tracking_data = get_data.get_tracking_data_week_1()
+        tracking_data = get_data.get_tracking_data_week_7()
 
         # Filter Play data by Passing plays only
         passing_play_data = play_data[play_data['passResult'].notna()]
@@ -440,20 +412,20 @@ class PassingDown():
             game_id = passing_play['gameId']
             print('play_id:', play_id)
             print('game_id:', game_id)
-            # print(player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']])
-            # target = player_plays_data[(player_plays_data['playId'] == play_id) & (passing_play_data['gameId'] == game_id)]
-            # target = player_plays_data[(player_plays_data['playId'] == play_id) & (player_plays_data['gameId'] == game_id)]
-            # print(target)
-            # first_row_play_index = target.index[0]
-            # print(first_row_play_index)
 
             self.get_defensive_features_at_snap(play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data)
 
-        # print('passing_play_data\n:', passing_play_data)
 
-        # self.get_defensive_features_at_snap(235, player_plays_data, passing_play_data, game_data, player_data, tracking_data)
-
-
+    def print_game_state(self, play_id, game_id, game_data, play_data):
+        print('======================================================================================================')
+        game = game_data[game_data['gameId'] == game_id].iloc[0]
+        play = play_data[(play_data['playId'] == play_id) & (play_data['gameId'] == game_id)].iloc[0]
+        print('GAME ID:', game_id)
+        print('PLAY_ID:', play_id)
+        print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
+        print(f"{game['homeTeamAbbr']} {play['preSnapHomeScore']} - {play['preSnapVisitorScore']} {game['visitorTeamAbbr']} | {play['absoluteYardlineNumber']} yd line | {play['possessionTeam']}'s ball")
+        print(f"Q{play['quarter']} [{play['down']}&{play['yardsToGo']}] {play['playDescription']}")
+        print('======================================================================================================')
 
 
 
