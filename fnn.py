@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
 
 import get_data
 
@@ -11,13 +12,13 @@ class FNN(nn.Module):
         super(FNN, self).__init__()
 
         # FFN Layers
-        self.linear_layer1 = nn.Linear(28, 32)
+        self.linear_layer1 = nn.Linear(37, 64)
         self.relu1 = nn.ReLU()
-        self.linear_layer2 = nn.Linear(32, 16)
+        self.linear_layer2 = nn.Linear(64, 32)
         self.relu2 = nn.ReLU()
-        self.linear_layer3 = nn.Linear(16, 8)
-        self.sigmoid = nn.Sigmoid()
-        self.output_layer = nn.Linear(8, 1)
+        self.linear_layer3 = nn.Linear(32, 16)
+        self.sigmoid = nn.ReLU()
+        self.output_layer = nn.Linear(16, 5)
 
     
     def forward(self, x):
@@ -28,12 +29,24 @@ class FNN(nn.Module):
         return x
     
 
-    def train_model(self):
-        plays_data = get_data.plays_2022()
-        train_x, train_y, test_x, test_y = self.process_data(plays_data, self.input_features)
+    def train_model(self, x, y):
+        # plays_data = get_data.plays_2022()
+        # train_x, train_y, test_x, test_y = self.process_data(plays_data, self.input_features)
+
+        train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2, random_state=42)
+
+        train_x = train_x.to_numpy()
+        test_x = test_x.to_numpy()
+        train_y = train_y.to_numpy()
+        test_y = test_y.to_numpy()
+
+        train_x = torch.tensor(train_x, dtype=torch.float32)#.long()
+        test_x = torch.tensor(test_x, dtype=torch.float32)#.long()
+        train_y = torch.tensor(train_y, dtype=torch.float32).long()
+        test_y = torch.tensor(test_y, dtype=torch.float32).long()
 
         print('train_x:', train_x.shape)
-        print('train_y:', train_y.shape)
+        print('train_y:', train_y.shape, train_y)
 
 
         # Defensive Coverage Effectiveness: Which Coverages Minimize Yards Gained?
@@ -68,8 +81,8 @@ class FNN(nn.Module):
                     'defense_Rk', 'defense_Cmp%', 'defense_TD%', 'defense_PD', 'defense_Int%', 'defense_ANY/A', 'defense_Rate', 'defense_QBHits', 'defense_TFL', 'defense_Sk%', 
                     'defense_EXP', 'offense_Rk', 'offense_Cmp%', 'offense_TD%', 'offense_Int%', 'offense_ANY/A', 'offense_Rate', 'offense_Sk%', 'offense_EXP', 'passLocation']
 
-        print('train_x:', train_x)
-        print('train_y:', train_y)
+        # print('train_x:', train_x)
+        # print('train_y:', train_y)
 
         '''
         Predict the Probability of a First Down (firstDown)
@@ -99,30 +112,30 @@ class FNN(nn.Module):
 
         '''
         
-        num_epochs = 1
+        num_epochs = 300
         batch_size = 32
-        dataset = TensorDataset(train_x, train_y)
-        train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+        # dataset = TensorDataset(train_x, train_y)
+        # train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
         model = FNN()
-        optimizer = optim.Adam(model.parameters(), lr=0.0001)
+        optimizer = optim.Adam(model.parameters(), lr=0.005)
         loss_fn = nn.CrossEntropyLoss()
 
         for epoch in range(num_epochs):
-            for batch_x, batch_y in train_loader:
-                optimizer.zero_grad()  # Zero gradients
+            # for batch_x, batch_y in train_loader:
+            optimizer.zero_grad()  # Zero gradients
 
-                # Forward pass with the entire training dataset
-                y_pred = model(batch_x) # Predict for all training data
-                loss = loss_fn(y_pred.squeeze(), batch_y) # Compute loss for all data
+            # Forward pass with the entire training dataset
+            y_pred = model(train_x) # Predict for all training data
+            loss = loss_fn(y_pred.squeeze(), train_y) # Compute loss for all data
 
-                loss.backward() # Backward pass
-                optimizer.step() # Update weights
+            loss.backward() # Backward pass
+            optimizer.step() # Update weights
 
-                # Calculate accuracy for the training set
-                with torch.no_grad():
-                    correct = (torch.argmax(y_pred, dim=1) == batch_y).sum().item()
-                    train_accuracy = correct / batch_y.shape[0]
+            # Calculate accuracy for the training set
+            with torch.no_grad():
+                correct = (torch.argmax(y_pred, dim=1) == train_y).sum().item()
+                train_accuracy = correct / train_y.shape[0]
 
                 print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Accuracy: {train_accuracy:.2%}")
 

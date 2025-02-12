@@ -1,7 +1,11 @@
 import numpy as np
 import get_data
 from passing_down import PassingDown
+import random_tree
+import fnn
 import time
+import pandas as pd
+from fnn import FNN
 
 def main():
     # PRO FOOTBALL REFERENCE
@@ -21,12 +25,21 @@ def main():
     elapsed_time = end_time - start_time
     print(f"Function took {elapsed_time} seconds to complete.")
 
-    # List all column values in the first row
-    # 0 = Pass
-    # 32 = Run
-    # first_row = plays_data.iloc[0]
-    # for column, value in first_row.items():
-    #     print(f'{column}: {value}')
+
+
+    # RUN MODELS
+    # data = pd.read_csv('play_features_pffCoverage.csv')
+    # print('data:', data.shape)
+    # x = data.iloc[:, :-1]
+    # y = data.iloc[:, -1]
+
+    # rt = random_tree.RandomForest(x, y)
+
+    # net = FNN()
+    # net.train_model(x, y)
+
+
+
 
     print('======================================================================================================')
 

@@ -1,6 +1,7 @@
 import pandas as pd
 import torch
 import stat_encodings
+import dask.dataframe as dd
 # from pro_football_reference_web_scraper import player_game_log as nfl_player
 # from pro_football_reference_web_scraper import team_game_log as nfl_team
 
@@ -62,7 +63,7 @@ def get_tracking_data_week_1():
     return tracking_data
 
 def get_tracking_data_week_7():
-    file_path = 'data/tracking_week_7.csv'
+    file_path = 'data//tracking_data/tracking_week_7.csv'
     tracking_data = pd.read_csv(file_path)
     return tracking_data
 

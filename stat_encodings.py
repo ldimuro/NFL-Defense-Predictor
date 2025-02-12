@@ -65,7 +65,7 @@ def encode_receiverAlignment(alignment):
 def encode_passCoverage(coverage):
     if pd.isna(coverage) or coverage == None:
         return -1
-    
+
     if 'Cover-1' in coverage:
         return 0
     elif 'Cover-2' in coverage:
@@ -76,20 +76,36 @@ def encode_passCoverage(coverage):
         return 3
     elif coverage == 'Quarters':
         return 4
-    elif coverage == 'Red Zone':
-        return 5
-    elif coverage == 'Cover-0':
-        return 6
-    elif coverage == '2-Man':
-        return 7
-    elif coverage == 'Prevent':
-        return 8
-    elif coverage == 'Goal Line':
-        return 9
-    elif coverage == 'Bracket':
-        return 10
-    elif coverage == 'Miscellaneous':
-        return 11
+    else:
+        return -1
+
+    # if pd.isna(coverage) or coverage == None:
+    #     return 12
+    
+    # if 'Cover-1' in coverage:
+    #     return 0
+    # elif 'Cover-2' in coverage:
+    #     return 1
+    # elif 'Cover-3' in coverage:
+    #     return 2
+    # elif 'Cover-6' in coverage or 'Cover 6' in coverage:
+    #     return 3
+    # elif coverage == 'Quarters':
+    #     return 4
+    # elif coverage == 'Red Zone':
+    #     return 5
+    # elif coverage == 'Cover-0':
+    #     return 6
+    # elif coverage == '2-Man':
+    #     return 7
+    # elif coverage == 'Prevent':
+    #     return 8
+    # elif coverage == 'Goal Line':
+    #     return 9
+    # elif coverage == 'Bracket':
+    #     return 10
+    # elif coverage == 'Miscellaneous':
+    #     return 11
     
 def encode_manZone(val):
     if pd.isna(val):
