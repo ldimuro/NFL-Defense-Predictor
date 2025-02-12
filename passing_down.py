@@ -1,6 +1,8 @@
 import torch
 import pandas as pd
 import numpy as np
+import os
+import time
 
 import get_data
 import stat_encodings
@@ -196,7 +198,7 @@ class PassingDown():
         player_play_data = player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId']][start*22:(start*22)+22]
         game_id = player_play_data['gameId'].iloc[0]
         play_id = player_play_data['playId'].iloc[0]
-        self.print_game_state(play_id, game_id, game_data, play_data)
+        get_data.print_game_state(play_id, game_id, game_data, play_data)
 
         # Get defensive players whose getOffTimeAsPassRusher is not Nan or causedPressure
         estimate_rushers = player_play_data[pd.notna(player_play_data['getOffTimeAsPassRusher']) | player_play_data['causedPressure'] == True]
@@ -238,27 +240,27 @@ class PassingDown():
         # POTENTIAL OTHER FEATURES:
         # - defender movement during offensive motion (1 feature)
         # - Safeties' Horizontal Spread (1 feature)
-        
 
-        print('getting state')
+        # tracking_data.set_index(['gameId', 'playId', 'nflId', 'frameType'], inplace=True)
+        
 
         # print(player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']])
 
         # Get Game State
         # start = 327
-        print('BEFORE\n:', player_plays_data)
+        # print('BEFORE\n:', player_plays_data)
         player_play_data = player_plays_data[['gameId', 'playId', 'nflId', 'teamAbbr']][start:start+22]
 
-        print('start:', start)
+        # print('start:', start)
 
-        print(f'all 22 players on play_{play_id}:\n{player_play_data}')
+        # print(f'all 22 players on play_{play_id}:\n{player_play_data}')
 
-        self.print_game_state(play_id, game_id, game_data, passing_play_data)
+        # self.print_game_state(play_id, game_id, game_data, passing_play_data)
 
         play = passing_play_data[(passing_play_data['playId'] == play_id) & (passing_play_data['gameId'] == game_id)].iloc[0]
 
         # Extract Center position to get y-axis of ball placement at the snap
-        print(player_play_data)
+        # print(player_play_data)
         offensive_ids = player_play_data[player_play_data['teamAbbr'] == play['possessionTeam']]['nflId'].to_list()
         print('offensive_ids:', offensive_ids)
         center_id = 0
@@ -268,16 +270,18 @@ class PassingDown():
                 center_id = id
                 break
 
-        print('center:', center_id)
-        print(tracking_data)
+        # print('center:', center_id)
+        # print('game_id:', game_id)
+        # print('play_id:', play_id)
+        # print(tracking_data)
 
         center_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
                     (tracking_data['playId'] == play_id) & 
                     (tracking_data['nflId'] == center_id) & 
                     (tracking_data['frameType'] == 'SNAP')]
-        print('center_tracking_data:\n', center_tracking_data)
+        # print('center_tracking_data:\n', center_tracking_data)
         ball_y_coord = center_tracking_data['y'].iloc[0]
-        print('ball position (y-axis):', ball_y_coord)
+        print('ball position (y-axis):\t', ball_y_coord)
 
         defensive_players_ids = player_play_data[player_play_data['teamAbbr'] != play['possessionTeam']]['nflId'].to_list()
 
@@ -301,11 +305,17 @@ class PassingDown():
         players_near_los = 0
         players_in_box = 0
 
+        # tracking_data.set_index(['gameId', 'playId', 'nflId', 'frameType'], inplace=True)
+
         for i,player_id in enumerate(defensive_players_ids):
             player_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
                     (tracking_data['playId'] == play_id) & 
                     (tracking_data['nflId'] == player_id) & 
                     (tracking_data['frameType'] == 'SNAP')]
+            # player_tracking_data = tracking_data.query(
+            #     'gameId == @game_id and playId == @play_id and nflId == @player_id and frameType == "SNAP"'
+            # )
+
             
             player = player_data[player_data['nflId'] == player_id].iloc[0]
             player_x_coord_at_snap = player_tracking_data['x'].iloc[0]
@@ -313,6 +323,8 @@ class PassingDown():
             player_jersey_num = int(player_tracking_data['jerseyNumber'].iloc[0])
             player_position = player['position']
             player_dist_to_los = np.round(np.abs(play['absoluteYardlineNumber'] - player_x_coord_at_snap), 4)
+
+            
 
             # Get depths of all defenders
             all_depths.append(player_dist_to_los)
@@ -374,17 +386,17 @@ class PassingDown():
         features['min_cb_depth'] = np.min(cb_depths)
 
         # print('ESTIMATED RUSHERS:', estimated_rushers_count)
-        print(features)
-        print('Avg defender depth:', np.round(np.mean(all_depths), 4))
-        print('Std defender depth:', np.round(np.std(all_depths), 4))
-        print('Deepest safety depth:', deepest_safety_depth)
-        print('Next deepest safety:', next_deepest_safety_depth)
-        print('Players in middle of the field:', middle_field_count)
+        # print(features)
+        print('Avg defender depth:\t\t', np.round(np.mean(all_depths), 4))
+        print('Std defender depth:\t\t', np.round(np.std(all_depths), 4))
+        print('Deepest safety depth:\t\t', deepest_safety_depth)
+        print('Next deepest safety:\t\t', next_deepest_safety_depth)
+        print('Players in middle of the field:\t', middle_field_count)
         print('Players in outside of the field:', outside_field_count)
-        print('Players near LoS:', players_near_los)
-        print('Players in box:', players_in_box)
-        print('Avg CB depth:', np.mean(cb_depths))
-        print('Min CB depth:', np.min(cb_depths))
+        print('Players near LoS:\t\t', players_near_los)
+        print('Players in box:\t\t\t', players_in_box)
+        print('Avg CB depth:\t\t\t', np.round(np.mean(cb_depths), 4))
+        print('Min CB depth:\t\t\t', np.min(cb_depths))
         
 
 
@@ -397,7 +409,15 @@ class PassingDown():
         play_data = get_data.plays_2022()
         game_data = get_data.games_2022()
         player_data = get_data.players_2022()
-        tracking_data = get_data.get_tracking_data_week_7()
+        # tracking_data = get_data.get_tracking_data_week_7()
+
+        tracking_week_1, tracking_week_2, tracking_week_3, tracking_week_4, tracking_week_5, tracking_week_6, tracking_week_7, tracking_week_8, tracking_week_9 = get_data.load_tracking_data()
+
+        # start_time = time.perf_counter()
+        # tracking_data = self.load_tracking_data()
+        # end_time = time.perf_counter()
+        # elapsed_time = end_time - start_time
+        # print(f'Loaded Tracking Data in {np.round(elapsed_time, 2)} seconds')
 
         # Filter Play data by Passing plays only
         passing_play_data = play_data[play_data['passResult'].notna()]
@@ -405,27 +425,67 @@ class PassingDown():
         z = 0
         for i,passing_play in passing_play_data.iterrows():
             z += 1
-            if z > 6:
+            if z > 20:
                 break
 
             play_id = passing_play['playId']
             game_id = passing_play['gameId']
-            print('play_id:', play_id)
-            print('game_id:', game_id)
+            game = game_data[game_data['gameId'] == game_id].iloc[0]
+            week = game['week']
+
+            get_data.print_game_state(play_id, game_id, game_data, passing_play_data)
+
+            # tracking_data = self.get_tracking_data(game['week'], play_id, game_id)
+            # print(tracking_data)
+
+            # if week == '1':
+            #     tracking_data = tracking_week_1
+            # elif week 
+
+            # print('week:', week)
+
+            match week:
+                case 1:
+                    tracking_data = tracking_week_1
+                    print('Using Tracking Data Week 1')
+                case 2:
+                    tracking_data = tracking_week_2
+                    print('Using Tracking Data Week 2')
+                case 3:
+                    tracking_data = tracking_week_3
+                    print('Using Tracking Data Week 3')
+                case 4:
+                    tracking_data = tracking_week_4
+                    print('Using Tracking Data Week 4')
+                case 5:
+                    tracking_data = tracking_week_5
+                    print('Using Tracking Data Week 5')
+                case 6:
+                    tracking_data = tracking_week_6
+                    print('Using Tracking Data Week 6')
+                case 7:
+                    tracking_data = tracking_week_7
+                    print('Using Tracking Data Week 7')
+                case 8:
+                    tracking_data = tracking_week_8
+                    print('Using Tracking Data Week 8')
+                case 9:
+                    tracking_data = tracking_week_9
+                    print('Using Tracking Data Week 9')
+                case _:
+                    print('Error - could not find Tracking Data')
 
             self.get_defensive_features_at_snap(play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data)
 
 
-    def print_game_state(self, play_id, game_id, game_data, play_data):
-        print('======================================================================================================')
-        game = game_data[game_data['gameId'] == game_id].iloc[0]
-        play = play_data[(play_data['playId'] == play_id) & (play_data['gameId'] == game_id)].iloc[0]
-        print('GAME ID:', game_id)
-        print('PLAY_ID:', play_id)
-        print(f"{game['gameDate']} | Week {game['week']} {game['season']} | {game['gameTimeEastern']} EST")
-        print(f"{game['homeTeamAbbr']} {play['preSnapHomeScore']} - {play['preSnapVisitorScore']} {game['visitorTeamAbbr']} | {play['absoluteYardlineNumber']} yd line | {play['possessionTeam']}'s ball")
-        print(f"Q{play['quarter']} [{play['down']}&{play['yardsToGo']}] {play['playDescription']}")
-        print('======================================================================================================')
+    
+
+    
+    
+    
+    
+
+
 
 
 

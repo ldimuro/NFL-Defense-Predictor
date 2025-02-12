@@ -1,6 +1,7 @@
 import numpy as np
 import get_data
 from passing_down import PassingDown
+import time
 
 def main():
     # PRO FOOTBALL REFERENCE
@@ -13,7 +14,12 @@ def main():
     # passing_down_model.train_model()
     # passing_down_model.RandomForest()
     # passing_down_model.estimated_rushers_on_play()
+
+    start_time = time.perf_counter()
     passing_down_model.get_defensive_features_for_passing_plays()
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"Function took {elapsed_time} seconds to complete.")
 
     # List all column values in the first row
     # 0 = Pass
