@@ -262,7 +262,7 @@ class PassingDown():
             target_y = stat_encodings.encode_passCoverage(play['pff_passCoverage'])
             if target_y == -1:
                 print('\tExcluded')
-                return torch.zeros(38)
+                return torch.zeros(40)
 
             # Extract receiverAlignment
             alignment = stat_encodings.encode_receiverAlignment(play['receiverAlignment'])
@@ -279,7 +279,7 @@ class PassingDown():
             # Extract Quarter
             quarter = play['quarter']
 
-            # Extract Down and Distance
+            # Extract Down and Distance, convert to a single value
             down = play['down']
             yards_to_go = stat_encodings.encode_yardsToGo(play['yardsToGo'])
 
@@ -327,6 +327,7 @@ class PassingDown():
             next_deepest_safety_depth = -1.0
 
             all_depths = []
+            all_y_coords = []
             cb_depths = []
 
             # Count how many players are inside/outside 10 yards of the ball's y-axis
@@ -369,6 +370,9 @@ class PassingDown():
                 # Get depths of all defenders
                 all_depths.append(player_dist_to_los)
 
+                # Get y-axes of all defenders
+                all_y_coords.append(player_y_coord_at_snap)
+
                 # Get depths of Safeties
                 if player_position == 'FS' or player_position == 'SS':
                     if player_dist_to_los > deepest_safety_depth:
@@ -401,18 +405,22 @@ class PassingDown():
 
                 positions_analyzed.append(player_position)
 
-
                 # Record player coordinates into features
                 features[f'defender{i+1}_x'] = player_dist_to_los
                 features[f'defender{i+1}_y'] = player_y_coord_at_snap
-                # position_count = positions_analyzed.count(player_position)
-                # features[f'{player_position}{position_count}_x'] = player_dist_to_los
-                # features[f'{player_position}{position_count}_y'] = player_y_coord_at_snap
+
 
                 if verbose:
                     print(f"#{player_jersey_num} {player_position}\tdist from LoS: {player_dist_to_los},\ty:{player_y_coord_at_snap}")
 
                 
+            # Average defender-to-deepest-safety distance
+            defender_safety_distances = [abs(d_x - deepest_safety_depth) for d_x in all_depths]
+            avg_safety_distance = np.round(np.mean(defender_safety_distances), 4)
+
+            # Lateral spread of defenders
+            lateral_spread = np.round(max(all_y_coords) - min(all_y_coords), 4)
+
                 
             # Combine all input features
             features['offensive_alignment'] = alignment
@@ -430,6 +438,8 @@ class PassingDown():
             features['std_defender_depth'] = np.round(np.std(all_depths), 4)
             features['avg_cb_depth'] = np.round(np.mean(cb_depths), 4)
             features['min_cb_depth'] = np.min(cb_depths)
+            features['avg_defender_to_deepest_safety'] = avg_safety_distance
+            features['lateral_spread'] = lateral_spread
             features['target_y'] = target_y
 
             if verbose:
@@ -450,6 +460,8 @@ class PassingDown():
                 print('Players in box:\t\t\t', players_in_box)
                 print('Avg CB depth:\t\t\t', np.round(np.mean(cb_depths), 4))
                 print('Min CB depth:\t\t\t', np.min(cb_depths))
+                print('Avg dist to deepest safety:\t', avg_safety_distance)
+                print('Lateral spread:\t\t\t', lateral_spread)
             
 
             features_list = list(features.values())
@@ -462,7 +474,7 @@ class PassingDown():
         
         except Exception as e:
             print('\tError processing:', e)
-            return torch.zeros(38)
+            return torch.zeros(40)
 
 
 
@@ -490,7 +502,7 @@ class PassingDown():
         passing_play_data = play_data[play_data['passResult'].notna()]
 
         count = 0
-        limit = 2300
+        limit = 2500#5500
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count > limit:
@@ -550,25 +562,12 @@ class PassingDown():
         columns = ['defender1_x', 'defender1_y', 'defender2_x', 'defender2_y', 'defender3_x', 'defender3_y', 
         'defender4_x', 'defender4_y', 'defender5_x', 'defender5_y', 'defender6_x', 'defender6_y',
         'defender7_x', 'defender7_y', 'defender8_x', 'defender8_y', 'defender9_x', 'defender9_y', 
-        'defender10_x', 'defender10_y', 'defender11_x', 'defender11_y', 'deepest_safety_depth',
-        'offensive_alignment', 'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go', 
+        'defender10_x', 'defender10_y', 'defender11_x', 'defender11_y', 'offensive_alignment', 
+        'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go', 'deepest_safety_depth', 
         'next_deepest_safety_depth', 'middle_field_count', 'outside_field_count', 'players_near_los', 
         'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 
-        'target_y']
+        'avg_safety_distance', 'lateral_spread', 'target_y']
         df = pd.DataFrame(numpy_array, columns=columns)
-        df.to_csv(f'play_features_pffCoverage_{len(columns)}features.csv', index=False)
+        df.to_csv(f'play_features_pffCoverage_{len(columns)}features_0-{limit}.csv', index=False)
 
-
-    
-
-    
-    
-    
-    
-
-
-
-
-
-        
 

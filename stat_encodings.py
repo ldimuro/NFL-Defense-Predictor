@@ -77,7 +77,7 @@ def encode_passCoverage(coverage):
     elif coverage == 'Quarters':
         return 4
     else:
-        return -1
+        return 5 # Other
 
     # if pd.isna(coverage) or coverage == None:
     #     return 12

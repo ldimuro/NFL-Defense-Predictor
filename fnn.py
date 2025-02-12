@@ -12,13 +12,13 @@ class FNN(nn.Module):
         super(FNN, self).__init__()
 
         # FFN Layers
-        self.linear_layer1 = nn.Linear(37, 64)
+        self.linear_layer1 = nn.Linear(39, 64)
         self.relu1 = nn.ReLU()
         self.linear_layer2 = nn.Linear(64, 32)
         self.relu2 = nn.ReLU()
         self.linear_layer3 = nn.Linear(32, 16)
         self.sigmoid = nn.ReLU()
-        self.output_layer = nn.Linear(16, 5)
+        self.output_layer = nn.Linear(16, 6)
 
     
     def forward(self, x):
@@ -112,7 +112,7 @@ class FNN(nn.Module):
 
         '''
         
-        num_epochs = 300
+        num_epochs = 200
         batch_size = 32
         # dataset = TensorDataset(train_x, train_y)
         # train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)

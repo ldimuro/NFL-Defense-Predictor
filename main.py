@@ -28,7 +28,7 @@ def main():
 
 
     # RUN MODELS
-    # data = pd.read_csv('play_features_pffCoverage.csv')
+    # data = pd.read_csv('play_features_pffCoverage_38features.csv')
     # print('data:', data.shape)
     # x = data.iloc[:, :-1]
     # y = data.iloc[:, -1]
