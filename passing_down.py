@@ -216,13 +216,11 @@ class PassingDown():
 
         # print(f'Blitz Percentage: {np.round((blitzes/5000)*100, 3)}%')
 
-    def get_defensive_features_at_snap(self, play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data):
+    def get_defensive_features_at_snap(self, play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data, verbose=False):
         start = play_id #327
         temp = player_plays_data[(player_plays_data['playId'] == play_id) & (player_plays_data['gameId'] == game_id)]
-        # print('XXX:', temp)
         first_row_play_index = temp.index[0]
         start = first_row_play_index
-        # print(first_row_play_index)
 
         # FEATURES TO EXTRACT (to predict pre-snap defensive shell)
         # - Each defender's distance to LOS (11 features)
@@ -242,27 +240,18 @@ class PassingDown():
         # - Safeties' Horizontal Spread (1 feature)
 
         # tracking_data.set_index(['gameId', 'playId', 'nflId', 'frameType'], inplace=True)
-        
-
-        # print(player_plays_data[['getOffTimeAsPassRusher', 'causedPressure', 'gameId', 'playId', 'nflId', 'teamAbbr']])
 
         # Get Game State
         # start = 327
-        # print('BEFORE\n:', player_plays_data)
         player_play_data = player_plays_data[['gameId', 'playId', 'nflId', 'teamAbbr']][start:start+22]
-
-        # print('start:', start)
-
-        # print(f'all 22 players on play_{play_id}:\n{player_play_data}')
-
-        # self.print_game_state(play_id, game_id, game_data, passing_play_data)
 
         play = passing_play_data[(passing_play_data['playId'] == play_id) & (passing_play_data['gameId'] == game_id)].iloc[0]
 
+        # EXTRACT pff_passCoverage TO USE AS TARGET
+        target_y = stat_encodings.encode_passCoverage(play['pff_passCoverage'])
+
         # Extract Center position to get y-axis of ball placement at the snap
-        # print(player_play_data)
         offensive_ids = player_play_data[player_play_data['teamAbbr'] == play['possessionTeam']]['nflId'].to_list()
-        print('offensive_ids:', offensive_ids)
         center_id = 0
         for id in offensive_ids:
             player = player_data[player_data['nflId'] == id].iloc[0]
@@ -270,19 +259,13 @@ class PassingDown():
                 center_id = id
                 break
 
-        # print('center:', center_id)
-        # print('game_id:', game_id)
-        # print('play_id:', play_id)
-        # print(tracking_data)
-
         center_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
                     (tracking_data['playId'] == play_id) & 
                     (tracking_data['nflId'] == center_id) & 
                     (tracking_data['frameType'] == 'SNAP')]
-        # print('center_tracking_data:\n', center_tracking_data)
+        
         ball_y_coord = center_tracking_data['y'].iloc[0]
-        print('ball position (y-axis):\t', ball_y_coord)
-
+        
         defensive_players_ids = player_play_data[player_play_data['teamAbbr'] != play['possessionTeam']]['nflId'].to_list()
 
         features = {}
@@ -308,15 +291,13 @@ class PassingDown():
         # tracking_data.set_index(['gameId', 'playId', 'nflId', 'frameType'], inplace=True)
 
         for i,player_id in enumerate(defensive_players_ids):
-            player_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
-                    (tracking_data['playId'] == play_id) & 
-                    (tracking_data['nflId'] == player_id) & 
-                    (tracking_data['frameType'] == 'SNAP')]
-            # player_tracking_data = tracking_data.query(
-            #     'gameId == @game_id and playId == @play_id and nflId == @player_id and frameType == "SNAP"'
-            # )
-
-            
+            # player_tracking_data = tracking_data[(tracking_data['gameId'] == game_id) & 
+            #         (tracking_data['playId'] == play_id) & 
+            #         (tracking_data['nflId'] == player_id) & 
+            #         (tracking_data['frameType'] == 'SNAP')]
+            player_tracking_data = tracking_data.query(
+                'gameId == @game_id and playId == @play_id and nflId == @player_id and frameType == "SNAP"'
+            )
             player = player_data[player_data['nflId'] == player_id].iloc[0]
             player_x_coord_at_snap = player_tracking_data['x'].iloc[0]
             player_y_coord_at_snap = player_tracking_data['y'].iloc[0]
@@ -324,7 +305,6 @@ class PassingDown():
             player_position = player['position']
             player_dist_to_los = np.round(np.abs(play['absoluteYardlineNumber'] - player_x_coord_at_snap), 4)
 
-            
 
             # Get depths of all defenders
             all_depths.append(player_dist_to_los)
@@ -369,7 +349,8 @@ class PassingDown():
             # features[f'{player_position}{position_count}_x'] = player_dist_to_los
             # features[f'{player_position}{position_count}_y'] = player_y_coord_at_snap
 
-            print(f"#{player_jersey_num} {player_position}\tdist from LoS: {player_dist_to_los},\ty:{player_y_coord_at_snap}")
+            if verbose:
+                print(f"#{player_jersey_num} {player_position}\tdist from LoS: {player_dist_to_los},\ty:{player_y_coord_at_snap}")
 
             
             
@@ -384,23 +365,30 @@ class PassingDown():
         features['std_defender_depth'] = np.round(np.std(all_depths), 4)
         features['avg_cb_depth'] = np.round(np.mean(cb_depths), 4)
         features['min_cb_depth'] = np.min(cb_depths)
+        features['target_y'] = target_y
 
-        # print('ESTIMATED RUSHERS:', estimated_rushers_count)
-        # print(features)
-        print('Avg defender depth:\t\t', np.round(np.mean(all_depths), 4))
-        print('Std defender depth:\t\t', np.round(np.std(all_depths), 4))
-        print('Deepest safety depth:\t\t', deepest_safety_depth)
-        print('Next deepest safety:\t\t', next_deepest_safety_depth)
-        print('Players in middle of the field:\t', middle_field_count)
-        print('Players in outside of the field:', outside_field_count)
-        print('Players near LoS:\t\t', players_near_los)
-        print('Players in box:\t\t\t', players_in_box)
-        print('Avg CB depth:\t\t\t', np.round(np.mean(cb_depths), 4))
-        print('Min CB depth:\t\t\t', np.min(cb_depths))
+        if verbose:
+            print('TARGET_Y:', target_y)
+            print('ball position (y-axis):\t', ball_y_coord)
+            print('Avg defender depth:\t\t', np.round(np.mean(all_depths), 4))
+            print('Std defender depth:\t\t', np.round(np.std(all_depths), 4))
+            print('Deepest safety depth:\t\t', deepest_safety_depth)
+            print('Next deepest safety:\t\t', next_deepest_safety_depth)
+            print('Players in middle of the field:\t', middle_field_count)
+            print('Players in outside of the field:', outside_field_count)
+            print('Players near LoS:\t\t', players_near_los)
+            print('Players in box:\t\t\t', players_in_box)
+            print('Avg CB depth:\t\t\t', np.round(np.mean(cb_depths), 4))
+            print('Min CB depth:\t\t\t', np.min(cb_depths))
         
 
+        features_list = list(features.values())
+        features_tensor = torch.tensor(features_list)
 
-        # print(player_play_data)
+        if verbose:
+            print(features_tensor)
+
+        return features_tensor
 
 
     def get_defensive_features_for_passing_plays(self):
@@ -413,6 +401,8 @@ class PassingDown():
 
         tracking_week_1, tracking_week_2, tracking_week_3, tracking_week_4, tracking_week_5, tracking_week_6, tracking_week_7, tracking_week_8, tracking_week_9 = get_data.load_tracking_data()
 
+        all_play_features = []
+
         # start_time = time.perf_counter()
         # tracking_data = self.load_tracking_data()
         # end_time = time.perf_counter()
@@ -422,60 +412,68 @@ class PassingDown():
         # Filter Play data by Passing plays only
         passing_play_data = play_data[play_data['passResult'].notna()]
 
-        z = 0
+        count = 0
+        limit = 20
         for i,passing_play in passing_play_data.iterrows():
-            z += 1
-            if z > 20:
+            count += 1
+            if count > limit:
                 break
+
+            print(f'analyzing play {count}/{limit}')
 
             play_id = passing_play['playId']
             game_id = passing_play['gameId']
             game = game_data[game_data['gameId'] == game_id].iloc[0]
             week = game['week']
 
-            get_data.print_game_state(play_id, game_id, game_data, passing_play_data)
-
-            # tracking_data = self.get_tracking_data(game['week'], play_id, game_id)
-            # print(tracking_data)
-
-            # if week == '1':
-            #     tracking_data = tracking_week_1
-            # elif week 
-
-            # print('week:', week)
+            # get_data.print_game_state(play_id, game_id, game_data, passing_play_data)
 
             match week:
                 case 1:
                     tracking_data = tracking_week_1
-                    print('Using Tracking Data Week 1')
+                    # print('Using Tracking Data Week 1')
                 case 2:
                     tracking_data = tracking_week_2
-                    print('Using Tracking Data Week 2')
+                    # print('Using Tracking Data Week 2')
                 case 3:
                     tracking_data = tracking_week_3
-                    print('Using Tracking Data Week 3')
+                    # print('Using Tracking Data Week 3')
                 case 4:
                     tracking_data = tracking_week_4
-                    print('Using Tracking Data Week 4')
+                    # print('Using Tracking Data Week 4')
                 case 5:
                     tracking_data = tracking_week_5
-                    print('Using Tracking Data Week 5')
+                    # print('Using Tracking Data Week 5')
                 case 6:
                     tracking_data = tracking_week_6
-                    print('Using Tracking Data Week 6')
+                    # print('Using Tracking Data Week 6')
                 case 7:
                     tracking_data = tracking_week_7
-                    print('Using Tracking Data Week 7')
+                    # print('Using Tracking Data Week 7')
                 case 8:
                     tracking_data = tracking_week_8
-                    print('Using Tracking Data Week 8')
+                    # print('Using Tracking Data Week 8')
                 case 9:
                     tracking_data = tracking_week_9
-                    print('Using Tracking Data Week 9')
+                    # print('Using Tracking Data Week 9')
                 case _:
                     print('Error - could not find Tracking Data')
 
-            self.get_defensive_features_at_snap(play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data)
+            all_play_features.append(self.get_defensive_features_at_snap(play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data))
+
+        all_play_features_tensor = torch.stack(all_play_features)
+        print('FINAL OUTPUT:', all_play_features_tensor.shape)
+
+        # Save output
+        numpy_array = all_play_features_tensor.numpy()
+        df = pd.DataFrame(numpy_array, columns=['defender1_x', 'defender1_y', 'defender2_x', 'defender2_y', 'defender3_x', 'defender3_y', 
+                                                'defender4_x', 'defender4_y', 'defender5_x', 'defender5_y', 'defender6_x', 'defender6_y',
+                                                'defender7_x', 'defender7_y', 'defender8_x', 'defender8_y', 'defender9_x', 'defender9_y', 
+                                                'defender10_x', 'defender10_y', 'defender11_x', 'defender11_y', 'deepest_safety_depth',
+                                                'next_deepest_safety_depth', 'middle_field_count', 'outside_field_count', 'players_near_los',
+                                                'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth',
+                                                'target_y'])
+        df.to_csv(f'play_features_pffCoverage.csv', index=False)
 
 
     

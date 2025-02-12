@@ -63,7 +63,7 @@ def encode_receiverAlignment(alignment):
         return 6
     
 def encode_passCoverage(coverage):
-    if pd.isna(coverage):
+    if pd.isna(coverage) or coverage == None:
         return -1
     
     if 'Cover-1' in coverage:
@@ -72,7 +72,7 @@ def encode_passCoverage(coverage):
         return 1
     elif 'Cover-3' in coverage:
         return 2
-    elif 'Cover 6' in coverage:
+    elif 'Cover-6' in coverage or 'Cover 6' in coverage:
         return 3
     elif coverage == 'Quarters':
         return 4
