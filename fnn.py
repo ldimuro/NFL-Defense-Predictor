@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
-
+from sklearn.preprocessing import StandardScaler
 import get_data
 
 class FNN(nn.Module):
@@ -12,38 +12,50 @@ class FNN(nn.Module):
         super(FNN, self).__init__()
 
         # FFN Layers
-        self.linear_layer1 = nn.Linear(39, 64)
-        self.relu1 = nn.ReLU()
-        self.linear_layer2 = nn.Linear(64, 32)
-        self.relu2 = nn.ReLU()
-        self.linear_layer3 = nn.Linear(32, 16)
-        self.sigmoid = nn.ReLU()
-        self.output_layer = nn.Linear(16, 6)
+        self.linear_layer1 = nn.Linear(39, 256)
+        self.relu = nn.ReLU()
+        self.bn1 = nn.BatchNorm1d(256)
+        self.dropout = nn.Dropout(0.2)
+
+        self.linear_layer2 = nn.Linear(256, 128)
+        self.bn2 = nn.BatchNorm1d(128)
+
+        self.linear_layer3 = nn.Linear(128, 64)
+
+        self.output_layer = nn.Linear(64, 6)
+        self.softmax = nn.Softmax(dim=1)
 
     
     def forward(self, x):
-        x = self.relu1(self.linear_layer1(x))
-        x = self.relu2(self.linear_layer2(x))
-        x = self.sigmoid(self.linear_layer3(x))
-        x = self.output_layer(x)
+        # x = self.relu(self.linear_layer1(x))
+        # x = self.relu(self.linear_layer2(x))
+        # x = self.softmax(self.output_layer(x))
+
+        x = self.relu(self.bn1(self.linear_layer1(x)))
+        x = self.dropout(x)
+        x = self.relu(self.bn2(self.linear_layer2(x)))
+        x = self.relu(self.linear_layer3(x))
+        x = self.softmax(self.output_layer(x))
         return x
     
 
     def train_model(self, x, y):
-        # plays_data = get_data.plays_2022()
-        # train_x, train_y, test_x, test_y = self.process_data(plays_data, self.input_features)
+
+        # Normalize features
+        scalar = StandardScaler()
+        x = scalar.fit_transform(x)
 
         train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2, random_state=42)
 
-        train_x = train_x.to_numpy()
-        test_x = test_x.to_numpy()
-        train_y = train_y.to_numpy()
-        test_y = test_y.to_numpy()
+        # train_x = train_x.to_numpy()
+        # test_x = test_x.to_numpy()
+        # train_y = train_y.to_numpy()
+        # test_y = test_y.to_numpy()
 
         train_x = torch.tensor(train_x, dtype=torch.float32)#.long()
         test_x = torch.tensor(test_x, dtype=torch.float32)#.long()
         train_y = torch.tensor(train_y, dtype=torch.float32).long()
-        test_y = torch.tensor(test_y, dtype=torch.float32).long()
+        test_y = torch.tensor(test_y.values, dtype=torch.float32).long()
 
         print('train_x:', train_x.shape)
         print('train_y:', train_y.shape, train_y)
@@ -112,37 +124,58 @@ class FNN(nn.Module):
 
         '''
         
-        num_epochs = 200
-        batch_size = 32
+        num_epochs = 100
+        batch_size = 64#32
+        best_acc = 0
+        patience = 10
+        patience_counter = 0
         # dataset = TensorDataset(train_x, train_y)
         # train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
         model = FNN()
-        optimizer = optim.Adam(model.parameters(), lr=0.005)
+        optimizer = optim.Adam(model.parameters(), lr=0.0005, weight_decay=1e-4)
         loss_fn = nn.CrossEntropyLoss()
 
         for epoch in range(num_epochs):
-            # for batch_x, batch_y in train_loader:
-            optimizer.zero_grad()  # Zero gradients
+            for i in range(0, len(train_x), batch_size):
+                batch_x = train_x[i:i+batch_size]
+                batch_y = train_y[i:i+batch_size]
 
-            # Forward pass with the entire training dataset
-            y_pred = model(train_x) # Predict for all training data
-            loss = loss_fn(y_pred.squeeze(), train_y) # Compute loss for all data
+                optimizer.zero_grad()  # Zero gradients
 
-            loss.backward() # Backward pass
-            optimizer.step() # Update weights
+                # Forward pass with the entire training dataset
+                y_pred = model(batch_x) # Predict for all training data
+                loss = loss_fn(y_pred.squeeze(), batch_y) # Compute loss for all data
 
-            # Calculate accuracy for the training set
+                loss.backward() # Backward pass
+                optimizer.step() # Update weights
+
+                # Calculate accuracy for the training set
+                # with torch.no_grad():
+                #     correct = (torch.argmax(y_pred, dim=1) == train_y).sum().item()
+                #     train_accuracy = correct / train_y.shape[0]
+
+                    # print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Accuracy: {train_accuracy:.2%}")
+
+            # Validation accuracy
+            model.eval()
             with torch.no_grad():
-                correct = (torch.argmax(y_pred, dim=1) == train_y).sum().item()
-                train_accuracy = correct / train_y.shape[0]
+                val_outputs = model(test_x)
+                val_preds = torch.argmax(val_outputs, dim=1)
+                acc = (val_preds == test_y).float().mean().item()
+            print(f"Epoch {epoch+1}/{num_epochs}, Loss: {loss.item():.4f}, Val Acc: {acc*100:.2f}%")
 
-                print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Accuracy: {train_accuracy:.2%}")
+            # Early stopping
+            if acc > best_acc:
+                best_acc = acc
+                patience_counter = 0  # Reset counter if accuracy improves
+            else:
+                patience_counter += 1
 
-        model.eval()  # Switch to evaluation mode
-        with torch.no_grad():  # Disable gradients for evaluation
-            y_test_pred = model(test_x)
-            test_correct = (torch.argmax(y_test_pred, dim=1) == test_y).sum().item()
-            test_accuracy = test_correct / test_y.shape[0]
+            if patience_counter >= patience:
+                print("Early stopping triggered.")
+                break
 
-        print(f"Test Accuracy FNN:\t{test_accuracy:.2%} (Train {train_accuracy:.2%})")
+
+
+        # print(f"Test Accuracy FNN:\t{test_accuracy:.2%} (Train {train_accuracy:.2%})")

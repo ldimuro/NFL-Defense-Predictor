@@ -8,11 +8,6 @@ import pandas as pd
 from fnn import FNN
 
 def main():
-    # PRO FOOTBALL REFERENCE
-    # kyler_murray_stats = pro_football_player_data('Kyler Murray', 'QB', 2024)
-    # cardinals_2008_stats = pro_football_team_data('Arizona Cardinals', 2008)
-    # print(kyler_murray_stats)
-    # print(cardinals_2008_stats)
 
     passing_down_model = PassingDown()
     # passing_down_model.train_model()
@@ -28,10 +23,17 @@ def main():
 
 
     # RUN MODELS
-    # data = pd.read_csv('play_features_pffCoverage_38features.csv')
+    # data = pd.read_csv('play_features_pffCoverage_40features_0-2500.csv')
     # print('data:', data.shape)
     # x = data.iloc[:, :-1]
     # y = data.iloc[:, -1]
+
+
+    # y_distribution = y.value_counts()
+    # print(y_distribution)
+
+    # majority_class_count = y_distribution.max()
+    # print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
 
     # rt = random_tree.RandomForest(x, y)
 
