@@ -40,8 +40,9 @@ def main():
     # data1 = pd.read_csv('play_features_pffCoverage_40features_0-2500.csv')
     # data2 = pd.read_csv('play_features_pffCoverage_40features_2500-5500.csv')
     # data3 = pd.read_csv('play_features_pffCoverage_40features_5500-8500.csv')
-    # data = pd.concat([data1, data2, data3], ignore_index=True)
-    # data.to_csv(f'play_features_pffCoverage_40features_0-8500.csv', index=False)
+    # data4 = pd.read_csv('play_features_pffCoverage_40features_8500-9736.csv')
+    # data = pd.concat([data1, data2, data3, data4], ignore_index=True)
+    # data.to_csv(f'play_features_pffCoverage_40features_0-9736.csv', index=False)
     data = pd.read_csv('play_features_pffCoverage_40features_0-8500.csv')
 
     # Remove all defender coordinate data
@@ -67,8 +68,8 @@ def main():
 
 
 
-    # net = FNN()
-    # net.train_model(x, y)
+    net = FNN()
+    net.train_model(x, y)
 
 
 

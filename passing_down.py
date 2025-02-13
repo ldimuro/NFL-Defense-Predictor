@@ -502,8 +502,8 @@ class PassingDown():
         passing_play_data = play_data[play_data['passResult'].notna()]
 
         count = 0
-        start = 5500
-        limit = 8500
+        start = 8500
+        limit = 15000
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count <= start:
