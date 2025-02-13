@@ -15,7 +15,7 @@ class FNN(nn.Module):
         self.linear_layer1 = nn.Linear(28, 256)
         self.relu = nn.ReLU()
         self.bn1 = nn.BatchNorm1d(256)
-        self.dropout = nn.Dropout(0.2)
+        # self.dropout = nn.Dropout(0.2)
 
         self.linear_layer2 = nn.Linear(256, 128)
         self.bn2 = nn.BatchNorm1d(128)
@@ -32,7 +32,7 @@ class FNN(nn.Module):
         # x = self.softmax(self.output_layer(x))
 
         x = self.relu(self.bn1(self.linear_layer1(x)))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         x = self.relu(self.bn2(self.linear_layer2(x)))
         x = self.relu(self.linear_layer3(x))
         x = self.softmax(self.output_layer(x))

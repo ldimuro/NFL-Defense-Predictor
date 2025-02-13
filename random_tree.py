@@ -80,4 +80,11 @@ def RandomForest(x, y):
     plt.tight_layout()
     plt.savefig('rf_feature_importance.png')
 
+    sorted_feature_importance = feature_importance[sorted_idx]
+
+    # Print out all features and their corresponding scores
+    print("Feature Importance Scores:")
+    for feature, score in zip(features, sorted_feature_importance):
+        print(f"{feature}: {score:.4f}")
+
 

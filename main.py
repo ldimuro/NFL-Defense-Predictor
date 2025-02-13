@@ -28,11 +28,11 @@ def main():
     # passing_down_model.RandomForest()
     # passing_down_model.estimated_rushers_on_play()
 
-    # start_time = time.perf_counter()
-    # passing_down_model.get_defensive_features_for_passing_plays()
-    # end_time = time.perf_counter()
-    # elapsed_time = end_time - start_time
-    # print(f"Function took {elapsed_time} seconds to complete.")
+    start_time = time.perf_counter()
+    passing_down_model.get_defensive_features_for_passing_plays()
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"Function took {elapsed_time} seconds to complete.")
 
 
 
@@ -48,11 +48,21 @@ def main():
     # Remove all defender coordinate data
     x_coord = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']
     y_coord = ['defender1_y', 'defender2_y', 'defender3_y', 'defender4_y', 'defender5_y', 'defender6_y', 'defender7_y', 'defender8_y', 'defender9_y', 'defender10_y', 'defender11_y']
-    columns_to_drop = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x',
-                       'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x', 'defender1_y', 'defender2_y', 'defender3_y', 
-                       'defender4_y', 'defender5_y', 'defender6_y', 'defender7_y', 'defender8_y', 'defender9_y', 'defender10_y', 
-                       'defender11_y']#, 'deepest_safety_depth','next_deepest_safety_depth', 'avg_safety_distance']#'middle_field_count','outside_field_count','players_near_los','players_in_box','avg_defender_depth','std_defender_depth','avg_cb_depth','min_cb_depth','avg_safety_distance','lateral_spread']
-    data = data.drop(columns=x_coord)
+    game_state = ['offensive_alignment', 'quarter', 'down', 'yards_to_go', 'possessionTeamScoreDiff']
+    columns_to_drop = ['defender1_x', 'defender1_y', 'defender2_x', 'defender2_y',
+       'defender3_x', 'defender3_y', 'defender4_x', 'defender4_y',
+       'defender5_x', 'defender5_y', 'defender6_x', 'defender6_y',
+       'defender7_x', 'defender7_y', 'defender8_x', 'defender8_y',
+       'defender9_x', 'defender9_y', 'defender10_x', 'defender10_y',
+       'defender11_x', 'defender11_y', 'offensive_alignment',
+       'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go',
+       'middle_field_count', 'outside_field_count', 'players_near_los',
+       'players_in_box', 'lateral_spread']
+    
+    # BEST RESULT
+    data = data.drop(columns=(x_coord))
+    
+    # data = data.drop(columns=columns_to_drop)
 
     print('data:', data.shape, data.columns)
     x = data.iloc[:, :-1]
@@ -64,12 +74,12 @@ def main():
     majority_class_count = y_distribution.max()
     print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
 
-    rt = random_tree.RandomForest(x, y)
+    # rt = random_tree.RandomForest(x, y)
 
 
 
-    net = FNN()
-    net.train_model(x, y)
+    # net = FNN()
+    # net.train_model(x, y)
 
 
 
