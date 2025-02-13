@@ -39,14 +39,19 @@ def main():
     # RUN MODELS
     # data1 = pd.read_csv('play_features_pffCoverage_40features_0-2500.csv')
     # data2 = pd.read_csv('play_features_pffCoverage_40features_2500-5500.csv')
-    # data = pd.concat([data1, data2], ignore_index=True)
-    # data.to_csv(f'play_features_pffCoverage_40features_0-5500.csv', index=False)
-    data = pd.read_csv('play_features_pffCoverage_40features_0-5500.csv')
+    # data3 = pd.read_csv('play_features_pffCoverage_40features_5500-8500.csv')
+    # data = pd.concat([data1, data2, data3], ignore_index=True)
+    # data.to_csv(f'play_features_pffCoverage_40features_0-8500.csv', index=False)
+    data = pd.read_csv('play_features_pffCoverage_40features_0-8500.csv')
 
     # Remove all defender coordinate data
+    x_coord = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']
+    y_coord = ['defender1_y', 'defender2_y', 'defender3_y', 'defender4_y', 'defender5_y', 'defender6_y', 'defender7_y', 'defender8_y', 'defender9_y', 'defender10_y', 'defender11_y']
     columns_to_drop = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x',
-                       'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']#, 'defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x', 'deepest_safety_depth','next_deepest_safety_depth', 'avg_safety_distance']#'middle_field_count','outside_field_count','players_near_los','players_in_box','avg_defender_depth','std_defender_depth','avg_cb_depth','min_cb_depth','avg_safety_distance','lateral_spread']
-    data = data.drop(columns=columns_to_drop)
+                       'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x', 'defender1_y', 'defender2_y', 'defender3_y', 
+                       'defender4_y', 'defender5_y', 'defender6_y', 'defender7_y', 'defender8_y', 'defender9_y', 'defender10_y', 
+                       'defender11_y']#, 'deepest_safety_depth','next_deepest_safety_depth', 'avg_safety_distance']#'middle_field_count','outside_field_count','players_near_los','players_in_box','avg_defender_depth','std_defender_depth','avg_cb_depth','min_cb_depth','avg_safety_distance','lateral_spread']
+    data = data.drop(columns=x_coord)
 
     print('data:', data.shape, data.columns)
     x = data.iloc[:, :-1]

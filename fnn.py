@@ -12,7 +12,7 @@ class FNN(nn.Module):
         super(FNN, self).__init__()
 
         # FFN Layers
-        self.linear_layer1 = nn.Linear(39, 256)
+        self.linear_layer1 = nn.Linear(28, 256)
         self.relu = nn.ReLU()
         self.bn1 = nn.BatchNorm1d(256)
         self.dropout = nn.Dropout(0.2)
