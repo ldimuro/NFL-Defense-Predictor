@@ -41,26 +41,17 @@ def main():
     # data4 = pd.read_csv('play_features_pffCoverage_40features_8500-9736.csv')
     # data = pd.concat([data1, data2, data3, data4], ignore_index=True)
     # data.to_csv(f'play_features_pffCoverage_40features_0-9736.csv', index=False)
-    data = pd.read_csv('features/play_features_pffCoverage_47features_0-2500.csv')
+    data = pd.read_csv('features/play_features_pffCoverage_40features_0-8500.csv')
 
     # Remove all defender coordinate data
     x_coord = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']
     y_coord = ['defender1_y', 'defender2_y', 'defender3_y', 'defender4_y', 'defender5_y', 'defender6_y', 'defender7_y', 'defender8_y', 'defender9_y', 'defender10_y', 'defender11_y']
     game_state = ['offensive_alignment', 'quarter', 'down', 'yards_to_go', 'possessionTeamScoreDiff']
-    columns_to_drop = ['defender1_x', 'defender1_y', 'defender2_x', 'defender2_y',
-       'defender3_x', 'defender3_y', 'defender4_x', 'defender4_y',
-       'defender5_x', 'defender5_y', 'defender6_x', 'defender6_y',
-       'defender7_x', 'defender7_y', 'defender8_x', 'defender8_y',
-       'defender9_x', 'defender9_y', 'defender10_x', 'defender10_y',
-       'defender11_x', 'defender11_y', 'offensive_alignment',
-       'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go',
-       'middle_field_count', 'outside_field_count', 'players_near_los',
-       'players_in_box', 'lateral_spread']
     
     # BEST RESULT
-    # data = data.drop(columns=(x_coord))
-    # data = data.drop(columns=columns_to_drop)
-    data = data.drop(columns=['man_zone'])
+    data = data.drop(columns=(x_coord))
+
+    # data = data.drop(columns=['man_zone'])
 
     print('data:', data.shape, data.columns)
     x = data.iloc[:, :-1]

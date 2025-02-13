@@ -2,16 +2,13 @@ import get_data
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
-# from imblearn.over_sampling import SMOTE
-# from imblearn.under_sampling import RandomUnderSampler
-# from xgboost import XGBClassifier
-# import lightgbm as lgb
 import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 def RandomForest(x, y):
 
@@ -25,25 +22,39 @@ def RandomForest(x, y):
     print(f'Random Forest Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}%')
     print(classification_report(test_y, y_pred_rf))
 
+    # FEATURE IMPORTANCE
     feature_importance = rf.feature_importances_
     sorted_idx = np.argsort(feature_importance)[::-1]
     features = np.array(train_x.columns)[sorted_idx]
-
     plt.figure(figsize=(10, 5))
     plt.barh(features[:10], feature_importance[sorted_idx][:10])
-    plt.xlabel("Feature Importance Score")
-    plt.ylabel("Features")
-    plt.title("Top 10 Most Important Features for Defensive Coverage Prediction")
+    plt.xlabel('Feature Importance Score')
+    plt.ylabel('Features')
+    plt.title('Top 10 Most Important Features for Defensive Coverage Prediction')
     plt.gca().invert_yaxis()
     plt.tight_layout()
-    plt.savefig('rf_feature_importance.png')
+    plt.savefig('diagrams/rf_feature_importance.png')
 
     sorted_feature_importance = feature_importance[sorted_idx]
 
     # Print out all features and their corresponding scores
-    print("Feature Importance Scores:")
+    print('FEATURE IMPORTANCE SCORES')
+    print('==============================================================================')
     for feature, score in zip(features, sorted_feature_importance):
-        print(f"{feature}: {score:.4f}")
+        print(f'{feature}: {score:.4f}')
+
+
+    # CONFUSION MATRIX
+    cm = confusion_matrix(y_pred_rf, test_y)
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row (true labels)
+    classes = ['Cover-1', 'Cover-2', 'Cover-3', 'Cover-6', 'Cover-4', 'Other']
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues', xticklabels=classes, yticklabels=classes)
+    plt.xlabel('Predicted Labels')
+    plt.ylabel('True Labels')
+    plt.title('Confusion Matrix')
+    plt.tight_layout()
+    plt.savefig('diagrams/rf_confusion_matrix.png')
 
 
     param_grid = {
