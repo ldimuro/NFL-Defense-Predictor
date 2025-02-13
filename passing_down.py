@@ -217,7 +217,7 @@ class PassingDown():
 
         # print(f'Blitz Percentage: {np.round((blitzes/5000)*100, 3)}%')
 
-    def get_defensive_features_at_snap(self, play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data, verbose=True):
+    def get_defensive_features_at_snap(self, play_id, game_id, player_plays_data, passing_play_data, game_data, player_data, tracking_data, verbose=False):
 
         try:
 
@@ -262,7 +262,7 @@ class PassingDown():
             target_y = stat_encodings.encode_passCoverage(play['pff_passCoverage'])
             if target_y == -1:
                 print('\tExcluded')
-                return torch.zeros(40)
+                return torch.zeros(47)
             
             # Extract pff_manZone
             man_zone = stat_encodings.encode_manZone(play['pff_manZone'])
@@ -504,7 +504,7 @@ class PassingDown():
                 print('Avg DB depth:\t\t\t', np.round(np.mean(db_depths), 4))
                 print('Mof Open:\t\t\t', mof_open)
                 print('Avg defender depth to deepest safety:', avg_defender_to_deepest_safety_depth)
-                print('defender lateral spread:\t\t', defender_lateral_spread)
+                print('defender lateral spread:\t', defender_lateral_spread)
             
 
             features_list = list(features.values())
@@ -517,7 +517,7 @@ class PassingDown():
         
         except Exception as e:
             print('\tError processing:', e)
-            return torch.zeros(40)
+            return torch.zeros(47)
 
 
 
@@ -546,7 +546,7 @@ class PassingDown():
 
         count = 0
         start = 0
-        limit = 10
+        limit = 20
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count <= start:
@@ -562,7 +562,7 @@ class PassingDown():
             game = game_data[game_data['gameId'] == game_id].iloc[0]
             week = game['week']
 
-            get_data.print_game_state(play_id, game_id, game_data, passing_play_data)
+            # get_data.print_game_state(play_id, game_id, game_data, passing_play_data)
 
             match week:
                 case 1:
@@ -606,15 +606,6 @@ class PassingDown():
 
         # Save output
         numpy_array = all_play_features_tensor.numpy()
-        # columns = ['defender1_x', 'defender1_y', 'defender2_x', 'defender2_y', 'defender3_x', 'defender3_y', 
-        # 'defender4_x', 'defender4_y', 'defender5_x', 'defender5_y', 'defender6_x', 'defender6_y',
-        # 'defender7_x', 'defender7_y', 'defender8_x', 'defender8_y', 'defender9_x', 'defender9_y', 
-        # 'defender10_x', 'defender10_y', 'defender11_x', 'defender11_y', 'offensive_alignment', 
-        # 'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go', 'deepest_safety_depth', 
-        # 'next_deepest_safety_depth', 'middle_field_count', 'outside_field_count', 'players_near_los', 
-        # 'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 
-        # 'avg_defender_to_deepest_safety_depth', 'defender_lateral_spread', 'target_y']
-
         columns = ['defender1_x', 'defender1_y', 'defender2_x', 'defender2_y', 'defender3_x', 'defender3_y', 
         'defender4_x', 'defender4_y', 'defender5_x', 'defender5_y', 'defender6_x', 'defender6_y',
         'defender7_x', 'defender7_y', 'defender8_x', 'defender8_y', 'defender9_x', 'defender9_y', 
@@ -624,7 +615,6 @@ class PassingDown():
         'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 
         'avg_defender_to_deepest_safety_depth', 'defender_lateral_spread', 'std_lb_depth', 'lb_lateral_spread', 'avg_lb_depth',
         'std_db_depth', 'avg_db_depth', 'mof_open', 'man_zone', 'target_y']
-
         df = pd.DataFrame(numpy_array, columns=columns)
         df.to_csv(f'features/play_features_pffCoverage_{len(columns)}features_{start}-{limit}.csv', index=False)
 
