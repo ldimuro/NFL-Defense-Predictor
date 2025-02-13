@@ -6,36 +6,61 @@ import fnn
 import time
 import pandas as pd
 from fnn import FNN
+import torch
+import random
+from sklearn.utils import check_random_state
+import matplotlib.pyplot as plt
+
+def set_seed(seed_value=42):
+    random.seed(seed_value)
+    np.random.seed(seed_value)
+    torch.manual_seed(seed_value)
+    torch.cuda.manual_seed_all(seed_value)
+    check_random_state(seed_value)
+
 
 def main():
+
+    set_seed()
 
     passing_down_model = PassingDown()
     # passing_down_model.train_model()
     # passing_down_model.RandomForest()
     # passing_down_model.estimated_rushers_on_play()
 
-    start_time = time.perf_counter()
-    passing_down_model.get_defensive_features_for_passing_plays()
-    end_time = time.perf_counter()
-    elapsed_time = end_time - start_time
-    print(f"Function took {elapsed_time} seconds to complete.")
+    # start_time = time.perf_counter()
+    # passing_down_model.get_defensive_features_for_passing_plays()
+    # end_time = time.perf_counter()
+    # elapsed_time = end_time - start_time
+    # print(f"Function took {elapsed_time} seconds to complete.")
 
 
 
     # RUN MODELS
-    # data = pd.read_csv('play_features_pffCoverage_40features_0-2500.csv')
-    # print('data:', data.shape)
-    # x = data.iloc[:, :-1]
-    # y = data.iloc[:, -1]
+    # data1 = pd.read_csv('play_features_pffCoverage_40features_0-2500.csv')
+    # data2 = pd.read_csv('play_features_pffCoverage_40features_2500-5500.csv')
+    # data = pd.concat([data1, data2], ignore_index=True)
+    # data.to_csv(f'play_features_pffCoverage_40features_0-5500.csv', index=False)
+    data = pd.read_csv('play_features_pffCoverage_40features_0-5500.csv')
+
+    # Remove all defender coordinate data
+    columns_to_drop = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x',
+                       'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']#, 'defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x', 'deepest_safety_depth','next_deepest_safety_depth', 'avg_safety_distance']#'middle_field_count','outside_field_count','players_near_los','players_in_box','avg_defender_depth','std_defender_depth','avg_cb_depth','min_cb_depth','avg_safety_distance','lateral_spread']
+    data = data.drop(columns=columns_to_drop)
+
+    print('data:', data.shape, data.columns)
+    x = data.iloc[:, :-1]
+    y = data.iloc[:, -1]
+
+    y_distribution = y.value_counts()
+    print(y_distribution)
+
+    majority_class_count = y_distribution.max()
+    print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
+
+    rt = random_tree.RandomForest(x, y)
 
 
-    # y_distribution = y.value_counts()
-    # print(y_distribution)
-
-    # majority_class_count = y_distribution.max()
-    # print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
-
-    # rt = random_tree.RandomForest(x, y)
 
     # net = FNN()
     # net.train_model(x, y)

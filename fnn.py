@@ -163,7 +163,7 @@ class FNN(nn.Module):
                 val_outputs = model(test_x)
                 val_preds = torch.argmax(val_outputs, dim=1)
                 acc = (val_preds == test_y).float().mean().item()
-            print(f"Epoch {epoch+1}/{num_epochs}, Loss: {loss.item():.4f}, Val Acc: {acc*100:.2f}%")
+            print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item():.4f}, Val Acc: {acc*100:.2f}%')
 
             # Early stopping
             if acc > best_acc:
@@ -173,8 +173,10 @@ class FNN(nn.Module):
                 patience_counter += 1
 
             if patience_counter >= patience:
-                print("Early stopping triggered.")
+                print('Early stopping triggered.')
                 break
+
+        print(f'BEST VAL ACCURACY: {best_acc*100:.2f}%')
 
 
 

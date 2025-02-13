@@ -10,6 +10,8 @@ from sklearn.model_selection import GridSearchCV
 # import lightgbm as lgb
 import torch
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 def RandomForest(x, y):
     # plays_data = get_data.plays_2022()
@@ -58,38 +60,24 @@ def RandomForest(x, y):
 
 
     # class_weights = {2.0: 1, 0.0: 1.2, 1.0: 1.5, 3.0: 2, 4.0: 1.3, 5.0: 1.5}
-    rf = RandomForestClassifier(n_estimators=100, max_depth=10) # 42
+    rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42) # 42
     rf.fit(train_x, train_y)
     y_pred_rf = rf.predict(test_x)
     print('==============================================================================')
     print(f'Random Forest Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}%')
     print(classification_report(test_y, y_pred_rf))
 
+    feature_importance = rf.feature_importances_
+    sorted_idx = np.argsort(feature_importance)[::-1]
+    features = np.array(train_x.columns)[sorted_idx]
 
+    plt.figure(figsize=(10, 5))
+    plt.barh(features[:10], feature_importance[sorted_idx][:10])
+    plt.xlabel("Feature Importance Score")
+    plt.ylabel("Features")
+    plt.title("Top 10 Most Important Features for Defensive Coverage Prediction")
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+    plt.savefig('rf_feature_importance.png')
 
-    # clf = lgb.LGBMClassifier(device='cpu', boosting_type='gbdt', class_weight='balanced', random_state=42)
-    # clf.fit(train_x, train_y)
-    # y_pred_rf = clf.predict(test_x)
-    # print('==============================================================================')
-    # print(f'LightGBM Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}%')
-    # print(classification_report(test_y, y_pred_rf))
-
-
-
-    # xgb_model = XGBClassifier(
-    #     n_estimators=50,       # Number of boosting rounds (trees)
-    #     max_depth=5,            # Controls tree depth (prevents overfitting)
-    #     learning_rate=0.1,      # Step size shrinkage to prevent overfitting
-    #     # subsample=0.8,          # Randomly samples 80% of data for training (helps generalization)
-    #     # colsample_bytree=0.8,   # Randomly samples 80% of features per tree
-    #     # objective='multi:softmax',  # Multi-class classification
-    #     # num_class=len(y.unique()),  # Number of coverage types (classes)
-    #     random_state=42
-    # )
-    # xgb_model.fit(train_x, train_y)
-    # y_pred_xgb = xgb_model.predict(test_x)
-    # accuracy = accuracy_score(test_y, y_pred_xgb)
-    # print('==============================================================================')
-    # print(f'XGBoost Model Accuracy: {accuracy:.2%}')
-    # print(classification_report(test_y, y_pred_xgb))
 
