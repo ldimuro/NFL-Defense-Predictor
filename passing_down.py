@@ -546,7 +546,7 @@ class PassingDown():
 
         count = 0
         start = 0
-        limit = 20
+        limit = 2500
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count <= start:

@@ -24,15 +24,13 @@ def main():
     set_seed()
 
     passing_down_model = PassingDown()
-    # passing_down_model.train_model()
-    # passing_down_model.RandomForest()
     # passing_down_model.estimated_rushers_on_play()
 
-    start_time = time.perf_counter()
-    passing_down_model.get_defensive_features_for_passing_plays()
-    end_time = time.perf_counter()
-    elapsed_time = end_time - start_time
-    print(f"Function took {elapsed_time} seconds to complete.")
+    # start_time = time.perf_counter()
+    # passing_down_model.get_defensive_features_for_passing_plays()
+    # end_time = time.perf_counter()
+    # elapsed_time = end_time - start_time
+    # print(f"Function took {elapsed_time} seconds to complete.")
 
 
 
@@ -43,7 +41,7 @@ def main():
     # data4 = pd.read_csv('play_features_pffCoverage_40features_8500-9736.csv')
     # data = pd.concat([data1, data2, data3, data4], ignore_index=True)
     # data.to_csv(f'play_features_pffCoverage_40features_0-9736.csv', index=False)
-    data = pd.read_csv('play_features_pffCoverage_40features_0-8500.csv')
+    data = pd.read_csv('features/play_features_pffCoverage_47features_0-2500.csv')
 
     # Remove all defender coordinate data
     x_coord = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']
@@ -60,9 +58,9 @@ def main():
        'players_in_box', 'lateral_spread']
     
     # BEST RESULT
-    data = data.drop(columns=(x_coord))
-    
+    # data = data.drop(columns=(x_coord))
     # data = data.drop(columns=columns_to_drop)
+    data = data.drop(columns=['man_zone'])
 
     print('data:', data.shape, data.columns)
     x = data.iloc[:, :-1]
@@ -74,7 +72,7 @@ def main():
     majority_class_count = y_distribution.max()
     print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
 
-    # rt = random_tree.RandomForest(x, y)
+    rt = random_tree.RandomForest(x, y)
 
 
 
