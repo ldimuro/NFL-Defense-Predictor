@@ -110,6 +110,23 @@ def RandomForest(x, y, dataframe):
     plt.savefig('diagrams/next_deepest_safety_depth_distribution.png')
 
 
+    # Create boxplots for avg_depth features across coverage types
+    avg_depth_features = ['avg_cb_depth', 'avg_db_depth', 'avg_defender_depth','avg_lb_depth']
+    plt.figure(figsize=(14, 10))
+    for i, feature in enumerate(avg_depth_features, 1):
+        plt.subplot(3, 4, i)  # Create a 3x4 grid of subplots
+        sns.boxplot(x='target_y', y=feature, data=dataframe_temp, palette='Set1', hue='target_y', legend=False)
+        plt.title(f'{feature}')
+        plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('diagrams/avg_depth_boxplots.png')
+
+
+    # sns.pairplot(dataframe[depth_features + ['target_y']], hue='target_y', palette='Set1')
+    # plt.suptitle('Pairplot of Depth Features by Coverage Type', y=1.02)
+    # plt.savefig('diagrams/depth_pairplots.png')
+
+
 
 
     param_grid = {
