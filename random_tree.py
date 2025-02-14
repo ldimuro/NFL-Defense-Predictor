@@ -71,22 +71,13 @@ def RandomForest(x, y, dataframe):
     downs = [1, 2, 3, 4]
     suffix = ['st', 'nd', 'rd', 'th']
     colors = ['#fc7060', '#db44d4', '#f0872b', '#7dcc7f', '#ffe046', '#1a76bc']
-    
     for i, down in enumerate(downs):
         ax = axes[i//2, i%2]  # Calculate position for a 2x2 grid
         ax.pie(coverage_dist.loc[down], labels=classes, colors=colors, autopct='%1.1f%%', startangle=90)
         ax.set_title(f'Coverage Distribution - {down}{suffix[i]}-Down')
 
-    # Display the plot
     plt.tight_layout()
     plt.savefig('diagrams/coverage_distribution_pie.png')
-
-    # coverage_dist.plot(kind='bar', stacked=True, figsize=(10, 6))
-    # plt.title('Distribution of Coverage Types Across Downs')
-    # plt.xlabel('Down')
-    # plt.ylabel('Frequency')
-    # plt.legend([classes[int(i)] for i in range(len(classes))], title='Coverage Type')
-    # plt.savefig('diagrams/coverage_distribution.png')
 
 
 
@@ -94,7 +85,10 @@ def RandomForest(x, y, dataframe):
     dataframe_temp = dataframe[dataframe['target_y'] != 5.0] # Remove 'Other' coverage class
     relevant_features = dataframe_temp[['deepest_safety_depth', 'next_deepest_safety_depth', 'target_y']]
     sns.pairplot(relevant_features, hue='target_y', palette='Set1')
-    plt.title('Pairplot of Key Features')
+    # pairplot._legend.remove()
+    # plt.legend(title='Coverage Type', labels=classes, bbox_to_anchor=(1.9, 1), loc='upper right')
+    # plt.subplots_adjust(right=0.85)
+    # plt.tight_layout()
     plt.savefig('diagrams/key_features_pairwise.png')
 
 
@@ -115,7 +109,7 @@ def RandomForest(x, y, dataframe):
     plt.figure(figsize=(14, 10))
     for i, feature in enumerate(avg_depth_features, 1):
         plt.subplot(3, 4, i)  # Create a 3x4 grid of subplots
-        sns.boxplot(x='target_y', y=feature, data=dataframe_temp, palette='Set1', hue='target_y', legend=False)
+        sns.boxplot(x='target_y', y=feature, data=dataframe_temp, hue='target_y', palette='Set1', legend=False)
         plt.title(f'{feature}')
         plt.xticks(rotation=45)
     plt.tight_layout()
@@ -125,8 +119,6 @@ def RandomForest(x, y, dataframe):
     # sns.pairplot(dataframe[depth_features + ['target_y']], hue='target_y', palette='Set1')
     # plt.suptitle('Pairplot of Depth Features by Coverage Type', y=1.02)
     # plt.savefig('diagrams/depth_pairplots.png')
-
-
 
 
     param_grid = {

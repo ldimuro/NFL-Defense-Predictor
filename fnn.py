@@ -5,6 +5,11 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import get_data
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+import numpy as np
+
 
 class FNN(nn.Module):
 
@@ -12,7 +17,7 @@ class FNN(nn.Module):
         super(FNN, self).__init__()
 
         # FFN Layers
-        self.linear_layer1 = nn.Linear(28, 256)
+        self.linear_layer1 = nn.Linear(45, 256)
         self.relu = nn.ReLU()
         self.bn1 = nn.BatchNorm1d(256)
         # self.dropout = nn.Dropout(0.2)
@@ -24,6 +29,12 @@ class FNN(nn.Module):
 
         self.output_layer = nn.Linear(64, 6)
         self.softmax = nn.Softmax(dim=1)
+
+        # self.linear_layer1 = nn.Linear(45, 64)
+        # self.relu = nn.ReLU()
+        # self.linear_layer2 = nn.Linear(64, 32)
+        # self.output_layer = nn.Linear(32, 6)
+        # self.softmax = nn.Softmax(dim=1)
 
     
     def forward(self, x):
@@ -141,13 +152,11 @@ class FNN(nn.Module):
                 batch_x = train_x[i:i+batch_size]
                 batch_y = train_y[i:i+batch_size]
 
-                optimizer.zero_grad()  # Zero gradients
+                optimizer.zero_grad()
+                y_pred = model(batch_x)
+                loss = loss_fn(y_pred.squeeze(), batch_y)
 
-                # Forward pass with the entire training dataset
-                y_pred = model(batch_x) # Predict for all training data
-                loss = loss_fn(y_pred.squeeze(), batch_y) # Compute loss for all data
-
-                loss.backward() # Backward pass
+                loss.backward()
                 optimizer.step() # Update weights
 
                 # Calculate accuracy for the training set
@@ -180,4 +189,20 @@ class FNN(nn.Module):
 
 
 
-        # print(f"Test Accuracy FNN:\t{test_accuracy:.2%} (Train {train_accuracy:.2%})")
+
+        # DIAGRAMS
+        ######################################################################################################
+        classes = ['Cover-1', 'Cover-2', 'Cover-3', 'Cover-6', 'Cover-4', 'Other']
+        cardinals_red = '#972440'
+
+        # CONFUSION MATRIX
+        cm = confusion_matrix(val_preds, test_y)
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row (true labels)    
+        plt.figure(figsize=(6, 5))
+        sns.heatmap(cm, annot=True, fmt='.2f', cmap='Reds', xticklabels=classes, yticklabels=classes)
+        plt.xlabel('Predicted Labels')
+        plt.ylabel('True Labels')
+        plt.title('Confusion Matrix')
+        plt.tight_layout()
+        plt.savefig('diagrams/fnn_confusion_matrix.png')
+
