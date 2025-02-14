@@ -98,6 +98,18 @@ def RandomForest(x, y, dataframe):
     plt.savefig('diagrams/key_features_pairwise.png')
 
 
+    dataframe_temp = dataframe[dataframe['target_y'] != 5.0] # Remove 'Other' coverage class
+    # dataframe_temp['targey_y'] = dataframe_temp['target_y'].map(lambda x: classes[x]) # Map target_y class names
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x='target_y', y='next_deepest_safety_depth', data=dataframe_temp, palette='Set2')
+    plt.title('Distribution of "next_deepest_safety_depth" by Coverage Type')
+    plt.xlabel('Coverage Type')
+    plt.ylabel('Next Deepest Safety Depth')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('diagrams/next_deepest_safety_depth_distribution.png')
+
+
 
 
     param_grid = {

@@ -47,9 +47,19 @@ def main():
     x_coord = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']
     y_coord = ['defender1_y', 'defender2_y', 'defender3_y', 'defender4_y', 'defender5_y', 'defender6_y', 'defender7_y', 'defender8_y', 'defender9_y', 'defender10_y', 'defender11_y']
     game_state = ['offensive_alignment', 'quarter', 'down', 'yards_to_go', 'possessionTeamScoreDiff']
+    depth_data = ['deepest_safety_depth', 'next_deepest_safety_depth', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 'avg_defender_to_deepest_safety_depth', 'std_lb_depth', 'avg_lb_depth', 'std_db_depth', 'avg_db_depth']
+    lateral_data = ['defender_lateral_spread', 'lb_lateral_spread']
+    std_data = ['std_db_depth', 'std_lb_depth', 'std_defender_depth']
+    avg_data = ['avg_defender_depth', 'avg_cb_depth', 'avg_defender_to_deepest_safety_depth', 'avg_lb_depth', 'avg_db_depth']
+
+    # INSIGHTS:
+    # - Removing x_coord only produces the best result
+    # - Game-state and Lateral/y data have very little effect on the accuracy
+    # - The most important data is the depth data
     
     # BEST RESULT
-    # data = data.drop(columns=(x_coord))
+    data = data.drop(columns=(x_coord))
+    # data = data.drop(columns=['next_deepest_safety_depth'])
 
     data = data.drop(columns=['man_zone'])
 
