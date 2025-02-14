@@ -545,8 +545,8 @@ class PassingDown():
         passing_play_data = play_data[play_data['passResult'].notna()]
 
         count = 0
-        start = 0
-        limit = 2500
+        start = 5500
+        limit = 8500
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count <= start:
@@ -613,8 +613,7 @@ class PassingDown():
         'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go', 'deepest_safety_depth', 
         'next_deepest_safety_depth', 'middle_field_count', 'outside_field_count', 'players_near_los', 
         'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 
-        'avg_defender_to_deepest_safety_depth', 'defender_lateral_spread', 'std_lb_depth', 'lb_lateral_spread', 'avg_lb_depth',
-        'std_db_depth', 'avg_db_depth', 'mof_open', 'man_zone', 'target_y']
+        'avg_defender_to_deepest_safety_depth', 'defender_lateral_spread', 'std_lb_depth', 'lb_lateral_spread', 'avg_lb_depth', 'std_db_depth', 'avg_db_depth', 'mof_open', 'man_zone', 'target_y']
         df = pd.DataFrame(numpy_array, columns=columns)
         df.to_csv(f'features/play_features_pffCoverage_{len(columns)}features_{start}-{limit}.csv', index=False)
 
