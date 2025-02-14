@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+import time
 
 def RandomForest(x, y, dataframe):
 
@@ -18,8 +19,9 @@ def RandomForest(x, y, dataframe):
     rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42) # 42
     rf.fit(train_x, train_y)
     y_pred_rf = rf.predict(test_x)
-    print('==============================================================================')
-    print(f'Random Forest Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}%')
+
+    print('======================================================================================================')
+    print(f'Random Forest Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}% (~0.02 seconds)')
     print(classification_report(test_y, y_pred_rf))
 
 
@@ -45,15 +47,17 @@ def RandomForest(x, y, dataframe):
     sorted_feature_importance = feature_importance[sorted_idx]
 
     # Print out all features and their corresponding scores
+    print('======================================================================================================')
     print('FEATURE IMPORTANCE SCORES')
-    print('==============================================================================')
     for feature, score in zip(features, sorted_feature_importance):
         print(f'{feature}: {score:.4f}')
 
 
     # CONFUSION MATRIX
+    print('======================================================================================================')
     cm = confusion_matrix(y_pred_rf, test_y)
-    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row (true labels)    
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row (true labels)
+    print('CONFUSION MATRIX:\n', cm)
     plt.figure(figsize=(6, 5))
     sns.heatmap(cm, annot=True, fmt='.2f', cmap='Reds', xticklabels=classes, yticklabels=classes)
     plt.xlabel('Predicted Labels')
@@ -95,7 +99,8 @@ def RandomForest(x, y, dataframe):
     dataframe_temp = dataframe[dataframe['target_y'] != 5.0] # Remove 'Other' coverage class
     # dataframe_temp['targey_y'] = dataframe_temp['target_y'].map(lambda x: classes[x]) # Map target_y class names
     plt.figure(figsize=(10, 6))
-    sns.boxplot(x='target_y', y='next_deepest_safety_depth', data=dataframe_temp, palette='Set2')
+    # sns.boxplot(x='target_y', y='next_deepest_safety_depth', data=dataframe_temp, palette='Set2')
+    sns.boxplot(x='target_y', y='next_deepest_safety_depth', data=dataframe_temp, hue='target_y', palette='Set2', legend=False)
     plt.title('Distribution of "next_deepest_safety_depth" by Coverage Type')
     plt.xlabel('Coverage Type')
     plt.ylabel('Next Deepest Safety Depth')
