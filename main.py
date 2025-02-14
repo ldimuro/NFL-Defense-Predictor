@@ -62,7 +62,7 @@ def main():
     # data = data.drop(columns=['next_deepest_safety_depth'])
 
     # Add Man/Zone into Coverage (e.g. Cover-1 Man, Cover-1 Zone, etc.)
-    data['target_y'] = data['target_y'] * 2 + data['man_zone']
+    # data['target_y'] = data['target_y'] * 2 + data['man_zone']
     data = data.drop(columns=['man_zone'])
 
     print('data:', data.shape, data.columns)
