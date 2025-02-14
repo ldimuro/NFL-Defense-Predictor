@@ -49,7 +49,7 @@ def main():
     game_state = ['offensive_alignment', 'quarter', 'down', 'yards_to_go', 'possessionTeamScoreDiff']
     
     # BEST RESULT
-    data = data.drop(columns=(x_coord))
+    # data = data.drop(columns=(x_coord))
 
     # data = data.drop(columns=['man_zone'])
 
@@ -63,7 +63,7 @@ def main():
     majority_class_count = y_distribution.max()
     print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
 
-    rt = random_tree.RandomForest(x, y)
+    rt = random_tree.RandomForest(x, y, data)
 
 
 

@@ -10,7 +10,7 @@ import numpy as np
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 
-def RandomForest(x, y):
+def RandomForest(x, y, dataframe):
 
     train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2, random_state=42)
 
@@ -22,12 +22,19 @@ def RandomForest(x, y):
     print(f'Random Forest Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}%')
     print(classification_report(test_y, y_pred_rf))
 
+
+
+    # DIAGRAMS
+    ######################################################################################################
+    classes = ['Cover-1', 'Cover-2', 'Cover-3', 'Cover-6', 'Cover-4', 'Other']
+    cardinals_red = '#972440'
+
     # FEATURE IMPORTANCE
     feature_importance = rf.feature_importances_
     sorted_idx = np.argsort(feature_importance)[::-1]
     features = np.array(train_x.columns)[sorted_idx]
     plt.figure(figsize=(10, 5))
-    plt.barh(features[:10], feature_importance[sorted_idx][:10])
+    plt.barh(features[:10], feature_importance[sorted_idx][:10], color=cardinals_red)
     plt.xlabel('Feature Importance Score')
     plt.ylabel('Features')
     plt.title('Top 10 Most Important Features for Defensive Coverage Prediction')
@@ -46,15 +53,51 @@ def RandomForest(x, y):
 
     # CONFUSION MATRIX
     cm = confusion_matrix(y_pred_rf, test_y)
-    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row (true labels)
-    classes = ['Cover-1', 'Cover-2', 'Cover-3', 'Cover-6', 'Cover-4', 'Other']
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row (true labels)    
     plt.figure(figsize=(6, 5))
-    sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues', xticklabels=classes, yticklabels=classes)
+    sns.heatmap(cm, annot=True, fmt='.2f', cmap='Reds', xticklabels=classes, yticklabels=classes)
     plt.xlabel('Predicted Labels')
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
     plt.tight_layout()
     plt.savefig('diagrams/rf_confusion_matrix.png')
+
+
+
+    # dataframe_temp = dataframe[dataframe['down'] != 4.0] # Remove 'Other' coverage class and 4th-Down plays
+    coverage_dist = dataframe.groupby(['down', 'target_y']).size().unstack()
+    coverage_dist = coverage_dist.div(coverage_dist.sum(axis=1), axis=0) # Normalize
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    downs = [1, 2, 3, 4]
+    suffix = ['st', 'nd', 'rd', 'th']
+    colors = ['#fc7060', '#db44d4', '#f0872b', '#7dcc7f', '#ffe046', '#1a76bc']
+    
+    for i, down in enumerate(downs):
+        ax = axes[i//2, i%2]  # Calculate position for a 2x2 grid
+        ax.pie(coverage_dist.loc[down], labels=classes, colors=colors, autopct='%1.1f%%', startangle=90)
+        ax.set_title(f'Coverage Distribution - {down}{suffix[i]}-Down')
+
+    # Display the plot
+    plt.tight_layout()
+    plt.savefig('diagrams/coverage_distribution_pie.png')
+
+    # coverage_dist.plot(kind='bar', stacked=True, figsize=(10, 6))
+    # plt.title('Distribution of Coverage Types Across Downs')
+    # plt.xlabel('Down')
+    # plt.ylabel('Frequency')
+    # plt.legend([classes[int(i)] for i in range(len(classes))], title='Coverage Type')
+    # plt.savefig('diagrams/coverage_distribution.png')
+
+
+
+    # Create a subset of features relevant to coverage prediction
+    dataframe_temp = dataframe[dataframe['target_y'] != 5.0] # Remove 'Other' coverage class
+    relevant_features = dataframe_temp[['deepest_safety_depth', 'next_deepest_safety_depth', 'target_y']]
+    sns.pairplot(relevant_features, hue='target_y', palette='Set1')
+    plt.title('Pairplot of Key Features')
+    plt.savefig('diagrams/key_features_pairwise.png')
+
+
 
 
     param_grid = {
