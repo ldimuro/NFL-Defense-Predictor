@@ -29,6 +29,7 @@ def RandomForest(x, y, dataframe):
     # DIAGRAMS
     ######################################################################################################
     classes = ['Cover-1', 'Cover-2', 'Cover-3', 'Cover-6', 'Cover-4', 'Other']
+    # classes = ['C-1 Man', 'C-2']
     cardinals_red = '#972440'
 
     # FEATURE IMPORTANCE
