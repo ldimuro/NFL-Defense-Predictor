@@ -52,7 +52,7 @@ class PassingDown():
             target_y = stat_encodings.encode_passCoverage(play['pff_passCoverage'])
             if target_y == -1:
                 print('\tExcluded')
-                return torch.zeros(47)
+                return torch.zeros(51)
             
             # Extract pff_manZone
             man_zone = stat_encodings.encode_manZone(play['pff_manZone'])
@@ -114,6 +114,10 @@ class PassingDown():
 
             cb_depths = []
 
+            safeties = ['FS', 'SS']
+            safety_depths = []
+            safety_y_coords = []
+
             # Count how many players are inside/outside 10 yards of the ball's y-axis
             middle_field_count = 0
             outside_field_count = 0
@@ -162,12 +166,17 @@ class PassingDown():
                 if player_position == 'CB':
                     cb_depths.append(player_dist_to_los)
 
-                # Get LB depths
+                # Get LB depths and spreads
                 if 'LB' in player_position:
                     lb_depths.append(player_dist_to_los)
                     lb_y_coords.append(player_y_coord_at_snap)
 
-                # Get DB depths
+                 # Get Safety depths and spreads
+                if player_position in safeties:
+                    safety_depths.append(player_dist_to_los)
+                    safety_y_coords.append(player_y_coord_at_snap)
+
+                # Get DB depths and spreads
                 if player_position in dbs:
                     db_depths.append(player_dist_to_los)
                     db_y_coords.append(player_y_coord_at_snap)
@@ -208,6 +217,9 @@ class PassingDown():
             # Lateral spread of LBs
             lb_lateral_spread = np.round(max(lb_y_coords) - min(lb_y_coords), 4)
 
+            # Lateral spread of Safeties
+            safety_lateral_spread = np.round(max(safety_y_coords) - min(safety_y_coords), 4)
+
             # Middle of Field open?
             mof_open = ((deepest_safety_depth > mof_open_thresh) & (next_deepest_safety_depth > mof_open_thresh)).astype(int)
 
@@ -235,6 +247,10 @@ class PassingDown():
             features['avg_lb_depth'] = np.round(np.mean(lb_depths), 4)
             features['std_db_depth'] = np.round(np.std(db_depths), 4)
             features['avg_db_depth'] = np.round(np.mean(db_depths), 4)
+            features['safety_lateral_spread'] = safety_lateral_spread
+            features['std_safety_depth'] = np.round(np.std(safety_depths), 4)
+            features['avg_safety_depth'] = np.round(np.mean(safety_depths), 4)
+            features['safety_depth_diff'] = deepest_safety_depth - next_deepest_safety_depth
             features['mof_open'] = mof_open
             features['man_zone'] = man_zone
             features['target_y'] = target_y
@@ -263,6 +279,10 @@ class PassingDown():
                 print('LB lateral spread:\t\t', lb_lateral_spread)
                 print('Std DB depth:\t\t\t', np.round(np.std(db_depths), 4))
                 print('Avg DB depth:\t\t\t', np.round(np.mean(db_depths), 4))
+                print('Avg safety depth:\t\t', np.round(np.mean(safety_depths), 4))
+                print('Std safety depth:\t\t', np.round(np.std(safety_depths), 4))
+                print('Safety lateral spread:\t\t', safety_lateral_spread)
+                print('Safety depth diff:\t\t', deepest_safety_depth - next_deepest_safety_depth)
                 print('Mof Open:\t\t\t', mof_open)
                 print('Avg defender depth to deepest safety:', avg_defender_to_deepest_safety_depth)
                 print('defender lateral spread:\t', defender_lateral_spread)
@@ -278,7 +298,7 @@ class PassingDown():
         
         except Exception as e:
             print('\tError processing:', e)
-            return torch.zeros(47)
+            return torch.zeros(51)
 
 
 
@@ -363,7 +383,9 @@ class PassingDown():
         'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go', 'deepest_safety_depth', 
         'next_deepest_safety_depth', 'middle_field_count', 'outside_field_count', 'players_near_los', 
         'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 
-        'avg_defender_to_deepest_safety_depth', 'defender_lateral_spread', 'std_lb_depth', 'lb_lateral_spread', 'avg_lb_depth', 'std_db_depth', 'avg_db_depth', 'mof_open', 'man_zone', 'target_y']
+        'avg_defender_to_deepest_safety_depth', 'defender_lateral_spread', 'std_lb_depth', 'lb_lateral_spread', 
+        'avg_lb_depth', 'std_db_depth', 'avg_db_depth', 'safety_lateral_spread', 'std_safety_depth', 
+        'avg_safety_depth', 'safety_depth_diff', 'mof_open', 'man_zone', 'target_y']
         df = pd.DataFrame(numpy_array, columns=columns)
         df.to_csv(f'features/play_features_pffCoverage_{len(columns)}features_{start}-{limit}.csv', index=False)
 

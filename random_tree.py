@@ -36,7 +36,7 @@ def RandomForest(x, y, dataframe):
     sorted_idx = np.argsort(feature_importance)[::-1]
     features = np.array(train_x.columns)[sorted_idx]
     plt.figure(figsize=(10, 5))
-    plt.barh(features[:10], feature_importance[sorted_idx][:10], color=cardinals_red)
+    plt.barh(features[:20], feature_importance[sorted_idx][:20], color=cardinals_red)
     plt.xlabel('Feature Importance Score')
     plt.ylabel('Features')
     plt.title('Top 10 Most Important Features for Defensive Coverage Prediction')
@@ -64,7 +64,7 @@ def RandomForest(x, y, dataframe):
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
     plt.tight_layout()
-    plt.savefig('diagrams/rf_confusion_matrix.png')
+    plt.savefig('diagrams/rf_confusion_matrix_51features.png')
 
 
 
