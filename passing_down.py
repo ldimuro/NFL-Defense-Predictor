@@ -241,7 +241,7 @@ class PassingDown():
             features['avg_cb_depth'] = np.round(np.mean(cb_depths), 4)
             features['min_cb_depth'] = np.min(cb_depths)
             features['max_cb_depth'] = np.max(cb_depths)
-            features['avg_defender_to_deepest_safety'] = np.round(avg_defender_to_deepest_safety_depth, 4)
+            features['avg_defender_to_deepest_safety_depth'] = np.round(avg_defender_to_deepest_safety_depth, 4)
             features['defender_lateral_spread'] = defender_lateral_spread
             features['std_lb_depth'] = np.round(np.std(lb_depths), 4)
             features['lb_lateral_spread'] = lb_lateral_spread
@@ -329,7 +329,7 @@ class PassingDown():
 
         count = 0
         start = 0
-        limit = 16000
+        limit = 2500
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count <= start:
@@ -391,7 +391,7 @@ class PassingDown():
         'defender10_x', 'defender10_y', 'defender11_x', 'defender11_y', 'offensive_alignment', 
         'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go', 'deepest_safety_depth', 
         'next_deepest_safety_depth', 'middle_field_count', 'outside_field_count', 'players_near_los', 
-        'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 'max_cb_depth'
+        'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 'max_cb_depth',
         'avg_defender_to_deepest_safety_depth', 'defender_lateral_spread', 'std_lb_depth', 'lb_lateral_spread', 
         'avg_lb_depth', 'min_lb_depth', 'max_lb_depth', 'std_db_depth', 'avg_db_depth', 'safety_lateral_spread', 'std_safety_depth', 
         'avg_safety_depth', 'safety_depth_diff', 'mof_open', 'man_zone', 'target_y']

@@ -1,5 +1,5 @@
 import get_data
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score, f1_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -16,12 +16,26 @@ def RandomForest(x, y, dataframe):
     train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2, random_state=42)
 
     # class_weights = {2.0: 1, 0.0: 1.2, 1.0: 1.5, 3.0: 2, 4.0: 1.3, 5.0: 1.5}
-    rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42) # 42
+    rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42, class_weight='balanced') # 42
     rf.fit(train_x, train_y)
     y_pred_rf = rf.predict(test_x)
 
+    majority_class = np.bincount(train_y).argmax()
+    # y_pred_baseline = [majority_class] * len(test_y)
+    baseline_preds = np.full_like(test_y, majority_class)
+    baseline_accuracy = accuracy_score(test_y, baseline_preds)
+    
+
+    precision_baseline = precision_score(test_y, baseline_preds, average='weighted', zero_division=0)
+    recall_baseline = recall_score(test_y, baseline_preds, average='weighted')
+    f1_baseline = f1_score(test_y, baseline_preds, average='weighted')
+
     print('======================================================================================================')
     print(f'Random Forest Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}% (~0.02 seconds)')
+    print(f'Baseline Accuracy:\t{baseline_accuracy*100}%')
+    print(f'Baseline Precision:\t{precision_baseline*100}%')
+    print(f'Baseline Recall:\t{recall_baseline*100}%')
+    print(f'Baseline F1-Score:\t{f1_baseline*100}%')
     print(classification_report(test_y, y_pred_rf))
 
 

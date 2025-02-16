@@ -78,8 +78,8 @@ def main():
     y_distribution = y.value_counts()
     print(y_distribution)
 
-    majority_class_count = y_distribution.max()
-    print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
+    # majority_class_count = y_distribution.max()
+    # print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
 
 
 
