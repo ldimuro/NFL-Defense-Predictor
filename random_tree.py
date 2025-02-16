@@ -9,22 +9,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+from imblearn.over_sampling import SMOTE
 import time
 
 def RandomForest(x, y, dataframe):
 
     train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2, random_state=42)
 
-    # class_weights = {2.0: 1, 0.0: 1.2, 1.0: 1.5, 3.0: 2, 4.0: 1.3, 5.0: 1.5}
-    rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42, class_weight='balanced') # 42
+    # smote = SMOTE(random_state=42)
+    # train_x_smote, train_y_smote = smote.fit_resample(train_x, train_y)
+
+    # Best results:  n_estimators=200, max_depth=20, random_state=42, class_weight='balanced'
+    rf = RandomForestClassifier(n_estimators=300, max_depth=20, random_state=42, class_weight='balanced') # 42
     rf.fit(train_x, train_y)
     y_pred_rf = rf.predict(test_x)
 
     majority_class = np.bincount(train_y).argmax()
-    # y_pred_baseline = [majority_class] * len(test_y)
     baseline_preds = np.full_like(test_y, majority_class)
     baseline_accuracy = accuracy_score(test_y, baseline_preds)
-    
 
     precision_baseline = precision_score(test_y, baseline_preds, average='weighted', zero_division=0)
     recall_baseline = recall_score(test_y, baseline_preds, average='weighted')
@@ -32,10 +34,10 @@ def RandomForest(x, y, dataframe):
 
     print('======================================================================================================')
     print(f'Random Forest Accuracy: {accuracy_score(test_y, y_pred_rf)*100:.2f}% (~0.02 seconds)')
-    print(f'Baseline Accuracy:\t{baseline_accuracy*100}%')
-    print(f'Baseline Precision:\t{precision_baseline*100}%')
-    print(f'Baseline Recall:\t{recall_baseline*100}%')
-    print(f'Baseline F1-Score:\t{f1_baseline*100}%')
+    print(f'Baseline Accuracy:\t{baseline_accuracy*100:.2f}%')
+    print(f'Baseline Precision:\t{precision_baseline*100:.2f}%')
+    print(f'Baseline Recall:\t{recall_baseline*100:.2f}%')
+    print(f'Baseline F1-Score:\t{f1_baseline*100:.2f}%')
     print(classification_report(test_y, y_pred_rf))
 
 
@@ -54,7 +56,7 @@ def RandomForest(x, y, dataframe):
     plt.barh(features[:20], feature_importance[sorted_idx][:20], color=cardinals_red)
     plt.xlabel('Feature Importance Score')
     plt.ylabel('Features')
-    plt.title('Top 10 Most Important Features for Defensive Coverage Prediction')
+    plt.title('Top 10 Most Important Features for Defensive Pass Coverage Prediction')
     plt.gca().invert_yaxis()
     plt.tight_layout()
     plt.savefig('diagrams/rf_feature_importance.png')

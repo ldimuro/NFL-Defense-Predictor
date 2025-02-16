@@ -23,12 +23,12 @@ def main():
 
     set_seed()
     
-    # passing_down_model = PassingDown()
-    # start_time = time.perf_counter()
-    # passing_down_model.get_defensive_features_for_passing_plays()
-    # end_time = time.perf_counter()
-    # elapsed_time = end_time - start_time
-    # print(f"Function took {elapsed_time} seconds to complete.")
+    passing_down_model = PassingDown()
+    start_time = time.perf_counter()
+    passing_down_model.get_defensive_features_for_passing_plays()
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"Function took {elapsed_time} seconds to complete.")
 
 
     # RUN MODELS

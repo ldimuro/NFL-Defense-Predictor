@@ -52,13 +52,15 @@ class PassingDown():
             target_y = stat_encodings.encode_passCoverage(play['pff_passCoverage'])
             if target_y == -1:
                 print('\tExcluded')
-                return torch.zeros(54)
+                return torch.zeros(55)
             
             # Extract pff_manZone
             man_zone = stat_encodings.encode_manZone(play['pff_manZone'])
 
-            # Extract receiverAlignment
-            alignment = stat_encodings.encode_receiverAlignment(play['receiverAlignment'])
+            # Extract receiverAlignment and offensiveFormation
+            receiver_alignment = stat_encodings.encode_receiverAlignment(play['receiverAlignment'])
+            offensive_formation = stat_encodings.encode_offenseFormation(play['offensiveFormation'])
+
 
             # Extract possessionTeamScoreDiff
             play_temp = pd.DataFrame([play])
@@ -225,7 +227,8 @@ class PassingDown():
 
                 
             # Combine all input features
-            features['offensive_alignment'] = alignment
+            features['receiver_alignment'] = receiver_alignment
+            features['offensive_formation'] = offensive_formation
             features['possessionTeamScoreDiff'] = possessionTeamScoreDiff
             features['quarter'] = quarter
             features['down'] = down
@@ -261,7 +264,8 @@ class PassingDown():
             if verbose:
                 print('TARGET_Y:\t\t\t', target_y)
                 print('Man or Zone:\t\t\t', man_zone)
-                print('offensive_alignment:\t\t', alignment)
+                print('receiver_alignment:\t\t', receiver_alignment)
+                print('offensive_formation:\t\t', offensive_formation)
                 print('possessionTeamScoreDiff:\t', possessionTeamScoreDiff)
                 print('quarter:\t\t\t', quarter)
                 print('down:\t\t\t\t', down)
@@ -304,7 +308,7 @@ class PassingDown():
         
         except Exception as e:
             print('\tError processing:', e)
-            return torch.zeros(54)
+            return torch.zeros(55)
 
 
 
@@ -328,8 +332,8 @@ class PassingDown():
         print('all passing play length:', len(passing_play_data))
 
         count = 0
-        start = 0
-        limit = 2500
+        start = 2500
+        limit = 5500
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count <= start:
@@ -388,7 +392,7 @@ class PassingDown():
         columns = ['defender1_x', 'defender1_y', 'defender2_x', 'defender2_y', 'defender3_x', 'defender3_y', 
         'defender4_x', 'defender4_y', 'defender5_x', 'defender5_y', 'defender6_x', 'defender6_y',
         'defender7_x', 'defender7_y', 'defender8_x', 'defender8_y', 'defender9_x', 'defender9_y', 
-        'defender10_x', 'defender10_y', 'defender11_x', 'defender11_y', 'offensive_alignment', 
+        'defender10_x', 'defender10_y', 'defender11_x', 'defender11_y', 'receiver_alignment', 'offensive_formation', 
         'possessionTeamScoreDiff', 'quarter', 'down', 'yards_to_go', 'deepest_safety_depth', 
         'next_deepest_safety_depth', 'middle_field_count', 'outside_field_count', 'players_near_los', 
         'players_in_box', 'avg_defender_depth', 'std_defender_depth', 'avg_cb_depth', 'min_cb_depth', 'max_cb_depth',
