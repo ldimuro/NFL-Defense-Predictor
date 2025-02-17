@@ -118,10 +118,10 @@ def RandomForest(x, y, dataframe):
     sorted_idx = np.argsort(feature_importance)[::-1]
     features = np.array(train_x.columns)[sorted_idx]
     plt.figure(figsize=(10, 5))
-    plt.barh(features[:20], feature_importance[sorted_idx][:20], color=cardinals_red)
+    plt.barh(features, feature_importance[sorted_idx], color=cardinals_red)
     plt.xlabel('Feature Importance Score')
     plt.ylabel('Features')
-    plt.title('Top 10 Most Important Features for Defensive Pass Coverage Prediction')
+    plt.title('Feature Importance for Defensive Pass Coverage Prediction')
     plt.gca().invert_yaxis()
     plt.tight_layout()
     plt.savefig('diagrams/rf_feature_importance.png')
@@ -192,15 +192,15 @@ def RandomForest(x, y, dataframe):
 
 
     # Create boxplots for avg_depth features across coverage types
-    avg_depth_features = ['avg_cb_depth', 'avg_db_depth', 'avg_defender_depth','avg_lb_depth']
-    plt.figure(figsize=(14, 10))
-    for i, feature in enumerate(avg_depth_features, 1):
-        plt.subplot(3, 4, i)  # Create a 3x4 grid of subplots
-        sns.boxplot(x='target_y', y=feature, data=dataframe_temp, hue='target_y', palette='Set1', legend=False)
-        plt.title(f'{feature}')
-        plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig('diagrams/avg_depth_boxplots.png')
+    # avg_depth_features = ['avg_cb_depth', 'avg_db_depth', 'avg_defender_depth','avg_lb_depth']
+    # plt.figure(figsize=(14, 10))
+    # for i, feature in enumerate(avg_depth_features, 1):
+    #     plt.subplot(3, 4, i)  # Create a 3x4 grid of subplots
+    #     sns.boxplot(x='target_y', y=feature, data=dataframe_temp, hue='target_y', palette='Set1', legend=False)
+    #     plt.title(f'{feature}')
+    #     plt.xticks(rotation=45)
+    # plt.tight_layout()
+    # plt.savefig('diagrams/avg_depth_boxplots.png')
 
 
     # sns.pairplot(dataframe[depth_features + ['target_y']], hue='target_y', palette='Set1')
