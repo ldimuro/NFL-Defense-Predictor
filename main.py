@@ -22,24 +22,19 @@ def set_seed(seed_value=42):
 def main():
 
     set_seed()
+
+    is_training = False
     
-    # passing_down_model = PassingDown()
-    # start_time = time.perf_counter()
-    # passing_down_model.get_defensive_features_for_passing_plays()
-    # end_time = time.perf_counter()
-    # elapsed_time = end_time - start_time
-    # print(f"Function took {elapsed_time} seconds to complete.")
+    if is_training:
+        passing_down_model = PassingDown()
+        start_time = time.perf_counter()
+        passing_down_model.get_defensive_features_for_passing_plays()
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        print(f"Function took {elapsed_time} seconds to complete.")
 
-
-    # RUN MODELS
-    # data1 = pd.read_csv('features/play_features_pffCoverage_55features_0-2500.csv')
-    # data2 = pd.read_csv('features/play_features_pffCoverage_55features_2500-5500.csv')
-    # data3 = pd.read_csv('features/play_features_pffCoverage_55features_5500-8500.csv')
-    # data4 = pd.read_csv('play_features_pffCoverage_40features_8500-9736.csv')
-    # data = pd.concat([data1, data2, data3], ignore_index=True)
-    # data.to_csv(f'features/play_features_pffCoverage_55features_0-8500.csv', index=False)
-    data = pd.read_csv('features/play_features_pffCoverage_51features_0-8500.csv')
-
+    # Obtain input features
+    data = pd.read_csv('features/play_features_pffCoverage_21features_passplays0-8500.csv')
 
     # Column types
     x_coords = ['defender1_x', 'defender2_x', 'defender3_x', 'defender4_x', 'defender5_x', 'defender6_x', 'defender7_x', 'defender8_x', 'defender9_x', 'defender10_x', 'defender11_x']
@@ -54,11 +49,6 @@ def main():
     safety_data = ['safety_depth_diff', 'std_safety_depth', 'avg_safety_depth']
     test = ['avg_defender_to_deepest_safety_depth']
 
-    # INSIGHTS:
-    # - Removing x_coords only produces the best result
-    # - Game-state and Lateral/y data have very little effect on the accuracy
-    # - The most important data is the depth data
-    
     # BEST RESULTS
     data = data.drop(columns=(x_coords + y_coords + db_data + safety_data + test)) # test = 'avg_defender_to_deepest_safety_depth'
     # data = data.drop(columns=(x_coords))
@@ -77,12 +67,6 @@ def main():
 
     y_distribution = y.value_counts()
     print(y_distribution)
-
-    # majority_class_count = y_distribution.max()
-    # print(f'BASELINE ACCURACY: {(majority_class_count / y.shape[0])*100:.2f}%')
-
-
-
 
     rt = random_tree.RandomForest(x, y, data)
 
