@@ -23,21 +23,21 @@ def main():
 
     set_seed()
     
-    passing_down_model = PassingDown()
-    start_time = time.perf_counter()
-    passing_down_model.get_defensive_features_for_passing_plays()
-    end_time = time.perf_counter()
-    elapsed_time = end_time - start_time
-    print(f"Function took {elapsed_time} seconds to complete.")
+    # passing_down_model = PassingDown()
+    # start_time = time.perf_counter()
+    # passing_down_model.get_defensive_features_for_passing_plays()
+    # end_time = time.perf_counter()
+    # elapsed_time = end_time - start_time
+    # print(f"Function took {elapsed_time} seconds to complete.")
 
 
     # RUN MODELS
-    # data1 = pd.read_csv('features/play_features_pffCoverage_51features_0-2500.csv')
-    # data2 = pd.read_csv('features/play_features_pffCoverage_51features_2500-5500.csv')
-    # data3 = pd.read_csv('features/play_features_pffCoverage_51features_5500-8500.csv')
+    # data1 = pd.read_csv('features/play_features_pffCoverage_55features_0-2500.csv')
+    # data2 = pd.read_csv('features/play_features_pffCoverage_55features_2500-5500.csv')
+    # data3 = pd.read_csv('features/play_features_pffCoverage_55features_5500-8500.csv')
     # data4 = pd.read_csv('play_features_pffCoverage_40features_8500-9736.csv')
     # data = pd.concat([data1, data2, data3], ignore_index=True)
-    # data.to_csv(f'features/play_features_pffCoverage_51features_0-8500.csv', index=False)
+    # data.to_csv(f'features/play_features_pffCoverage_55features_0-8500.csv', index=False)
     data = pd.read_csv('features/play_features_pffCoverage_51features_0-8500.csv')
 
 
