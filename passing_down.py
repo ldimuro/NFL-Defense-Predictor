@@ -59,7 +59,7 @@ class PassingDown():
 
             # Extract receiverAlignment and offensiveFormation
             receiver_alignment = stat_encodings.encode_receiverAlignment(play['receiverAlignment'])
-            offensive_formation = stat_encodings.encode_offenseFormation(play['offensiveFormation'])
+            offensive_formation = stat_encodings.encode_offenseFormation(play['offenseFormation'])
 
 
             # Extract possessionTeamScoreDiff
@@ -332,8 +332,8 @@ class PassingDown():
         print('all passing play length:', len(passing_play_data))
 
         count = 0
-        start = 2500
-        limit = 5500
+        start = 5500
+        limit = 8500
         for i,passing_play in passing_play_data.iterrows():
             count += 1
             if count <= start:

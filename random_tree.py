@@ -16,13 +16,78 @@ def RandomForest(x, y, dataframe):
 
     train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.2, random_state=42)
 
-    # smote = SMOTE(random_state=42)
-    # train_x_smote, train_y_smote = smote.fit_resample(train_x, train_y)
+    # CALCULATE BEST n_estimator
+    # n_estimators_range = range(10, 401, 10)
+    # n_accuracy_scores = []
+    # best_n = 0
+    # best_acc = 0
+    # for n in n_estimators_range:
+    #     print('n:', n)
+    #     rf = RandomForestClassifier(n_estimators=n, max_depth=20, random_state=42, class_weight='balanced') # 42
+    #     rf.fit(train_x, train_y)
+    #     y_pred = rf.predict(test_x)
+
+    #     accuracy = accuracy_score(test_y, y_pred)
+    #     if accuracy > best_acc:
+    #         best_acc = accuracy
+    #         best_n = n
+
+    #     n_accuracy_scores.append(accuracy)
+
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(n_estimators_range, n_accuracy_scores, marker='o')
+    # plt.title('Effect of n_estimators on Random Forest Performance')
+    # plt.xlabel('Number of Trees (n_estimators)')
+    # plt.ylabel('Accuracy')
+    # plt.grid(True)
+    # plt.savefig('diagrams/n_estimators.png')
+
+    # print('BEST n_estimator:', best_n)
+
+    # CALCULATE BEST max_depth_range
+    # max_depth_range = range(1, 41)
+    # depth_accuracy_scores = []
+    # best_depth = 0
+    # best_acc = 0
+    # for depth in max_depth_range:
+    #     print('depth:', depth)
+    #     rf = RandomForestClassifier(n_estimators=180, max_depth=depth, random_state=42, class_weight='balanced') # 42
+    #     rf.fit(train_x, train_y)
+    #     y_pred = rf.predict(test_x)
+
+    #     accuracy = accuracy_score(test_y, y_pred)
+    #     if accuracy > best_acc:
+    #         best_acc = accuracy
+    #         best_depth = depth
+
+    #     depth_accuracy_scores.append(accuracy)
+
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(max_depth_range, depth_accuracy_scores, marker='o')
+    # plt.title('Effect of max_depth on Random Forest Performance')
+    # plt.xlabel('Max Depth')
+    # plt.ylabel('Accuracy')
+    # plt.grid(True)
+    # plt.savefig('diagrams/max_depths.png')
+
+    # print('BEST max_depth:', best_depth)
+    
+
+    best_n_estimator = 180
+    best_max_depth = 20
+
 
     # Best results:  n_estimators=200, max_depth=20, random_state=42, class_weight='balanced'
-    rf = RandomForestClassifier(n_estimators=300, max_depth=20, random_state=42, class_weight='balanced') # 42
+    rf = RandomForestClassifier(n_estimators=best_n_estimator, max_depth=best_max_depth, random_state=42, class_weight='balanced') # 42
     rf.fit(train_x, train_y)
     y_pred_rf = rf.predict(test_x)
+
+
+
+
+
+
+
 
     majority_class = np.bincount(train_y).argmax()
     baseline_preds = np.full_like(test_y, majority_class)
