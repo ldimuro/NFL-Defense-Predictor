@@ -4,6 +4,8 @@ This project uses a **Random Forest classifier** to predict pre-snap **NFL defen
 
 **Author:** Louis DiMuro
 
+[📄 Read the Full Paper (PDF)](Predicting_NFL_Defensive_Pass_Coverages_Pre_Snap_with_Random_Forest_Classification.pdf)
+
 ---
 
 ## Overview
