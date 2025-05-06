@@ -45,7 +45,7 @@ This project uses a **Random Forest classifier** to predict pre-snap **NFL defen
 
 ---
 
-## ⚙Methodology
+## Methodology
 
 1. Extracted features from:
     - `games.csv`, `plays.csv`, `tracking.csv`, and `player_play.csv`
