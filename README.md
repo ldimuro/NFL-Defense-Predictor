@@ -19,7 +19,7 @@ This project uses a **Random Forest classifier** to predict pre-snap **NFL defen
 
 ## Objective
 
-1. **Predict** the defensive pass coverage *before the snap*
+1. **Predict** the defensive pass coverage before the snap
 2. **Identify** the most important features contributing to these predictions
 
 ---
@@ -47,6 +47,7 @@ This project uses a **Random Forest classifier** to predict pre-snap **NFL defen
 
 1. Extracted features from:
     - `games.csv`, `plays.csv`, `tracking.csv`, and `player_play.csv`
+    - NOTE: tracking data was too large to put in this repo, but can be found here: https://www.kaggle.com/datasets/marriottgiftmumba/nfl-big-data-bowl-2025
 2. Filtered passing plays only
 3. Encoded categorical features to numeric
 4. Created spatial metrics based on defender coordinates
@@ -67,9 +68,9 @@ This project uses a **Random Forest classifier** to predict pre-snap **NFL defen
 | Cover-6      | 0.42      | 0.33   | 0.37     |
 | Quarters     | 0.49      | 0.41   | 0.45     |
 | Other        | 0.64      | 0.56   | 0.60     |
-| **Weighted Avg** | **0.55** | **0.56** | **0.55** |
+| **WEIGHTED AVG** | **0.55** | **0.56** | **0.55** |
 
-![Confusion Matrix](diagrams/rl_confusion_matrix.png)
+![Confusion Matrix](diagrams/rf_confusion_matrix.png)
 
 ---
 
@@ -84,7 +85,7 @@ This project uses a **Random Forest classifier** to predict pre-snap **NFL defen
 
 ## Feature Importance
 
-![Feature Importance](diagrams/rl_feature_importance.png)
+![Feature Importance](diagrams/rf_feature_importance.png)
 
 - **Top Features:** `deepest_safety_depth`, `next_deepest_safety_depth`
 - **Least Important:** `down`, `receiver_alignment`, `possession_team_score_diff`
