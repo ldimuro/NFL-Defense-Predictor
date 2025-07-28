@@ -104,4 +104,4 @@ This project uses a **Random Forest classifier** to predict pre-snap **NFL defen
 
 ## Summary
 
-Despite the inherent difficulty of predicting NFL pass coverages pre-snap, this model achieved **55.86% accuracy**, improving significantly on the random baseline. **Safety alignment** proved to be the most influential factor, and while game-state features contributed little, **spatial depth** of both safeties were the 2 most important features that contributed to each prediction.
+Despite the inherent difficulty of predicting NFL pass coverages pre-snap, this model achieved **55.86% accuracy**, improving significantly on the random baseline. **Safety alignment** proved to be the most influential factor, and while game-state features contributed little, **spatial depth** of the deepest safety was the most important feature that contributed to each prediction.
